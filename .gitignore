@@ -1,3 +1,8 @@
+*.DS_Store
+
+
+
+# -- Node.js --
 # Logs
 logs
 *.log

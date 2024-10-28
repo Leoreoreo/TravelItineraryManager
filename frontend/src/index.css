@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+:root {
+  --white:  rgb(255, 255, 255);
+  --black:  rgb(0, 0, 0);
+  --grey:   rgb(241, 241, 241);
+  --bggrey: rgb(250, 250, 250);
+  --shadow: rgb(180, 180, 180);
+}
+body {
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.fade-in {
+  animation: fadeInAnimation 1.5s ease-in forwards;
+}
+@keyframes fadeInAnimation {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+/* base styles */
+* {
+  margin: 0;
+  font-family: "Quicksand";
+  color: var(--black);
+}
+
+.links {
+  color: var(--black); 
+}
+.links:hover {
+  color: var(--shadow);
+}
+
