@@ -1,4 +1,3 @@
-import './googleMap.css';
 
 const Block = () => {
     return ( 
