@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './schedule.css';
 
 const Schedule = () => {
   const [fadeIn, setFadeIn] = useState(false);

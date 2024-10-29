@@ -1,10 +1,10 @@
 
-const User = () => {
+const User = ({ user }) => {
 
     return ( 
         <div>
             <br></br>
-            <h1>User</h1>
+            <h1>User: {user} </h1>
         </div>
     );
 }
