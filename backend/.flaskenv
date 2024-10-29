@@ -1,0 +1,4 @@
+FLASK_APP=server
+FLASK_DEBUT=True
+FLASK_RUN_HOST=db8.cse.nd.edu
+FLASK_RUN_PORT=5000
