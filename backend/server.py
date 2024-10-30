@@ -1,81 +1,56 @@
-from flask import Flask, jsonify, g
+from flask import Flask, jsonify, request
 from config import Config
 import psycopg2
 from psycopg2 import pool
 import logging
 import atexit
-
+from db_utils import *
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 logging.basicConfig(level=logging.INFO)
-connection_pool = None
-
-def create_connection_pool():
-    """ create a connection pool for the application (better scalability also cool ig) """
-    global connection_pool
-    if connection_pool is None:
-        logging.info("Creating connection pool...")
-        connection_pool = psycopg2.pool.SimpleConnectionPool(
-            1,  # minimum number of connections
-            10,  # maximum number of connections
-            host=app.config['DB_HOST'],
-            port=app.config['DB_PORT'],
-            database=app.config['DB_NAME'],
-            user=app.config['DB_USERNAME'],
-            password=app.config['DB_PASSWORD']
-        )
-
-def free_connection_pool():
-    """ free the connection pool and close all connections """
-    global connection_pool
-    if connection_pool:
-        logging.info("Closing connection pool...")
-        connection_pool.closeall()  # close all connections in the pool
-        logging.info("Connection pool closed.")
-        connection_pool = None  # remove the reference to the pool
-
-
+atexit.register(free_connection_pool)# register the free_connection_pool function to be called on app shutdown
 
 @app.route('/')
 def hello():
     return 'Hello, World!'
 
+@app.route('/register', methods=['POST'])
+def register():
+    """ register a new user"""
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required.'}), 400
+
+    if register_user(username, password):
+        return jsonify({'message': 'User registered successfully.'}), 201
+    else:
+        return jsonify({'error': 'User registration failed.'}), 500
+
+@app.route('/login', methods=['POST'])
+def login():
+    """ log in an existing user """
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required.'}), 400
+
+    if authenticate_user(username, password):
+        return jsonify({'message': 'Login successful.'}), 200
+    else:
+        return jsonify({'error': 'Invalid username or password.'}), 401
+
 @app.route('/db_version', methods=['GET'])
-def get_db_version():
+def version():
     """Get the PostgreSQL database version."""
-    connection = None
-    cursor = None
-    try:
-        create_connection_pool()  # Ensure the connection pool is created
-        connection = connection_pool.getconn()  # Get a connection from the pool
-        cursor = connection.cursor()
-
-        # Execute a query to fetch the database version
-        cursor.execute("SELECT version();")
-        db_version = cursor.fetchone()
-
-        return jsonify({'database_version': db_version[0]})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection_pool.putconn(connection)  # Return the connection to the pool
-
-# Register the free_connection_pool function to be called on app shutdown
-atexit.register(free_connection_pool)
-'''
-@app.teardown_appcontext
-def close_db_connection(exception):
-    """Close the database connection at the end of the request."""
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-'''
-# if __name__ == '__main__':
-#     app.run(debug=True)
+    db_version = get_db_version()  # Call the function from db.py
+    if db_version:
+        return jsonify({'database_version': db_version}), 200
+    else:
+        return jsonify({'error': 'Could not fetch database version.'}), 500
