@@ -1,7 +1,6 @@
 import Navbar from './components/Navbar';
 import Home from './components/home'
 import User from './components/user';
-import GoogleMap from './components/googleMap';
 import Schedule from './components/schedule';
 import SignIn from './components/signIn';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -23,8 +22,7 @@ function App() {
           <Route exact path="/signin/">
             <SignIn setUser = {setUser}/>
           </Route>
-          <Route exact path="/travel/">
-            <GoogleMap />
+          <Route exact path="/trip/">
             <Schedule />
           </Route>
         </Switch>
