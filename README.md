@@ -6,28 +6,38 @@
 - ReactJS
 
 ### Usage
-Default: http://localhost:3000/
+#### Install Dependencies
 ```
 $ cd frontend
 $ npm install
+```
+#### Run 
+```
 $ npm start
 ```
+Default: http://localhost:3000/
 
 ## BACKEND
 - Python (Flask)
 
-### Usage (python environment)
-0. try to use python 3.12.3 (if you are working on the aws server, should be default this)
-1. `$ python -m venv venv`   <--  creates virtual environment
-2. `$ source venv/bin/activate`  <--  activates venv
-3. `$ pip install -r requirements.txt` <-- downloads all dependencies 
-4. `$ pip list`  <--  just to check if everything is downloaded
-
+### Usage
+#### Install Dependencies
 * if `python` doesn't work, try `python3`
+0. try to use python 3.12.3 (if you are working on the aws server, should be default this)
+```
+$ python -m venv venv               // create virtual environment
+$ source venv/bin/activate          // activate venv
+$ pip install -r requirements.txt   // downloads dependencies
+$ pip list                          // check if everything is downloaded
+```
 
-### Usage (flask server)
-1. you will not need to change the config file i believe as that is only for connecting to the db
-2. `$ flask run`  <--  will run the server, should be on localhost
+#### Run
+* you will not need to change the config file i believe as that is only for connecting to the db
+```
+$ source venv/bin/activate  // activate venv
+$ flask run                 // run the server, should be on localhost
+```
+Default: http://127.0.0.1:8081
 
 ## Database 
 - Postgresql (should be always on since the server is on 24/7, so you can remote access)
