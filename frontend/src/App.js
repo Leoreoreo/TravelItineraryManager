@@ -3,6 +3,7 @@ import Home from './components/home'
 import User from './components/user';
 import Schedule from './components/schedule';
 import SignIn from './components/signIn';
+import Register from './components/register';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
@@ -21,6 +22,9 @@ function App() {
           </Route>
           <Route exact path="/signin/">
             <SignIn setUser = {setUser}/>
+          </Route>
+          <Route exact path="/register/">
+            <Register />
           </Route>
           <Route exact path="/trip/">
             <Schedule />

@@ -5,9 +5,11 @@ from psycopg2 import pool
 import logging
 import atexit
 from db_utils import *
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_object(Config)
+CORS(app)
 
 logging.basicConfig(level=logging.INFO)
 atexit.register(free_connection_pool)# register the free_connection_pool function to be called on app shutdown
@@ -24,11 +26,14 @@ def register():
     password = data.get('password')
 
     if not username or not password:
+        print('Username and password are required.')
         return jsonify({'error': 'Username and password are required.'}), 400
 
     if register_user(username, password):
+        print('User registered successfully.')
         return jsonify({'message': 'User registered successfully.'}), 201
     else:
+        print('User registration failed.')
         return jsonify({'error': 'User registration failed.'}), 500
 
 @app.route('/login', methods=['POST'])
