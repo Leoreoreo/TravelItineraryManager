@@ -1,73 +1,122 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import config from "../config";
+import { useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
+import useTripStore from "../store/tripStore";
 
 const Home = ({ user }) => {
-    const [activeLink, setActiveLink] = useState('/');
-    const trip_ids = [1, 2, 3, 4];
+  const [activeLink, setActiveLink] = useState("/");
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const uid = useAuthStore((state) => state.uid);
+  const navigate = useNavigate();
+  const { trips, loading, error, fetchTrips, addTrip } = useTripStore();
 
-    useEffect(() => {
-        setActiveLink('/');
-    }, []);
+  useEffect(() => {
+    setActiveLink("/");
+  }, []);
 
-    return (
-        <div>
-            <br />
-            {user ? (
-            <div>
-                <h1>Welcome, {user}! </h1>
-                <br />
-                <br />
-                <br />
-                {trip_ids.map((trip_id) => (
-                    <h2 key={trip_id}>
-                        <Link
-                            to={`/trip/${trip_id}`}
-                            className={activeLink === `/trip/${trip_id}` ? 'active' : ''}
-                            onClick={() => setActiveLink(`/trip/${trip_id}`)}
-                        >
-                            Trip {trip_id}
-                        </Link>
-                    </h2>
-                ))}
-                <br />
-                <br />
-                <br />
-                <h2>
-                    <Link
-                        to="/trip/"
-                        className={activeLink === '/trip/' ? 'active' : ''}
-                        onClick={() => setActiveLink('/trip/')}
-                    >
-                        add trip
-                    </Link>
-                </h2>
-            </div>
-            ) : (
-            <div>
-                <h1>Welcome to Travel Itinerary Manager! </h1>
-                <br />
-                <br />
-                <br />
-                <h2>Start planning your trip by ...</h2>
-                <br />
-                <br />
-                <h3>
-                    <Link
-                        to="/signin/"
-                        className={activeLink === '/signin/' ? 'active' : ''}
-                        onClick={() => setActiveLink('/signin/')}
-                    >signing in</Link>
-                    <div> or </div>
-                    <Link
-                        to="/register/"
-                        className={activeLink === '/register/' ? 'active' : ''}
-                        onClick={() => setActiveLink('/register/')}
-                    >creating an account</Link>
-                </h3>
-            </div>
-            )}
-        </div>
-    );
+  useEffect(() => {
+    if (uid && trips.length == 0) {
+      fetchTrips(uid);
+    }
+  }, [uid]);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleAddTrip = async () => {
+    if (title.trim().length === 0) {
+      setMessage("please enter the title");
+      return;
+    }
+    if (!uid) {
+      setMessage("please login first");
+      return;
+    }
+
+    setMessage("");
+
+    await addTrip(uid, title, null, null); // later need to add start date and end date
+    if (error) {
+      setMessage(error);
+    } else {
+      setTitle("");
+      handleClose();
+    }
+  };
+
+  return (
+    <div>
+      <br />
+      <div>
+        <h1>Welcome, {user}! </h1>
+        <br />
+        <br />
+        <br />
+        {trips &&
+          trips.map(({ trip_id, trip_name, start_date, end_date }) => (
+            <h2 key={trip_id}>
+              <Link
+                to={`/trip/${trip_id}`}
+                className={activeLink === `/trip/${trip_id}` ? "active" : ""}
+                onClick={() => setActiveLink(`/trip/${trip_id}`)}
+              >
+                {trip_name}
+              </Link>
+            </h2>
+          ))}
+        <br />
+        <br />
+        <br />
+        <h2>
+          <Button onClick={handleOpen}>Add Trip</Button>
+        </h2>
+      </div>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Start a new trip!</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+            <Typography variant="h6">Title:</Typography>
+            <TextField
+              hiddenLabel
+              size="small"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+          </Box>
+          {message.length !== 0 && (
+            <Typography variant="h6" color="red">
+              {message}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddTrip} autoFocus>
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 };
 
 export default Home;

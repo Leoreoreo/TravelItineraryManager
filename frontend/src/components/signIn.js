@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import config from '../config';
+import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/authStore';
 
-function SignIn({ setUser }) {
+function SignIn() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const setUser = useAuthStore((state) => state.setUser); // Get setUid from the store
+  const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -15,8 +19,9 @@ function SignIn({ setUser }) {
     });
     const data = await response.json();
     if (response.ok) {
-      setUser(username); // Set the user upon successful login
+      setUser(data.uid, username)
       setMessage(data.message);
+      navigate('/')
     } else {
       setMessage(data.error || 'Login failed.');
     }
