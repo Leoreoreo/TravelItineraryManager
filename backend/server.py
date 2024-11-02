@@ -46,10 +46,34 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password are required.'}), 400
 
-    if authenticate_user(username, password):
-        return jsonify({'message': 'Login successful.'}), 200
+    uid = authenticate_user(username, password)
+    if uid:
+        return jsonify({'message': 'Login successful.', "uid": uid}), 200
     else:
         return jsonify({'error': 'Invalid username or password.'}), 401
+    
+@app.route('/fetch_all_trip', methods=['GET'])
+def fetchAllTrips():
+    uid = request.args.get('uid') 
+
+    trips = fetch_all_trips(uid)
+    print("trips are", trips)
+    if trips:
+        return jsonify({'message': 'Fetch successful.', "trips": trips}), 200
+    else:
+        return jsonify({'error': 'Fail to fetch all trips.'}), 401
+
+@app.route('/addtrip', methods=['POST'])
+def addTrip():
+    data = request.json
+    title = data.get('title')
+    uid = data.get('uid')
+
+    trip = add_trip_to_db(title, uid)
+    if trip:
+        return jsonify({"trip": trip}), 200
+    return jsonify({'error': 'fail to add trip into database'}), 401
+
 
 @app.route('/db_version', methods=['GET'])
 def version():
@@ -59,3 +83,6 @@ def version():
         return jsonify({'database_version': db_version}), 200
     else:
         return jsonify({'error': 'Could not fetch database version.'}), 500
+    
+if __name__ == '__main__':
+    app.run(debug=True, port=8081)

@@ -75,28 +75,104 @@ def authenticate_user(username, password):
         cursor = conn.cursor()
         
         # fetch the user from the users table
-        sql =  "SELECT password FROM users WHERE username = %s"
+        sql =  "SELECT user_id, password FROM users WHERE username = %s"
         val = (username,)
         cursor.execute(sql, val)
         user = cursor.fetchone()
         
         # valid
-        if user and check_password_hash(user[0], password):  # Check the password
+        if user and check_password_hash(user[1], password):  # Check the password
             logging.info(f"User validated: {username}")
-            return True
+            return user[0]
 
         # invalid
         logging.info(f"User validation failed: {username}")
-        return False
+        return None
 
     except Exception as e:
         logging.error(f"Error validating user: {str(e)}")
-        return False
+        return None
     finally:
         if cursor:
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
+
+def fetch_all_trips(uid):
+    """ check all trips of a user from db """
+    create_connection_pool()
+    conn = None
+    cursor = None
+    
+    try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
+        
+        # fetch the user from the users table
+        sql =  "SELECT trip_id, trip_name, start_date, end_date FROM trips WHERE uid_fk = %s"
+        val = (uid,)
+        cursor.execute(sql, val)
+        trips = cursor.fetchall()
+
+        # Get column names from cursor description
+        columns = [desc[0] for desc in cursor.description]
+
+        # Fetch all rows and convert each to a dictionary
+        trips = [dict(zip(columns, row)) for row in trips]
+        logging.info(f"trips are {trips}")
+        # valid
+        if trips:  # Check the password
+            logging.info(f"Fetch All trips")
+            return trips
+
+        # invalid
+        logging.info(f"Fetch all trips failed")
+        return None
+
+    except Exception as e:
+        logging.error(f"Error fetching trips: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
+def add_trip_to_db(title, uid):
+    """ add the trip to the database"""
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{title}, {uid}')
+
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
+
+        # insert the user into the users table
+        sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+        val = (uid, title)
+        cursor.execute(sql, val)
+        trip = cursor.fetchone()
+        conn.commit()
+  
+        # Get column names from cursor description
+        columns = [desc[0] for desc in cursor.description]
+
+        # Fetch all rows and convert each to a dictionary
+        trip = dict(zip(columns, trip))
+
+        logging.info(f"User add trip, trip: {trip}")
+        return trip
+    except Exception as e:
+        logging.error(f"Error adding trip: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+    
     
         
 
