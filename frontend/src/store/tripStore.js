@@ -15,11 +15,12 @@ const useTripStore = create((set) => ({
       const response = await fetch(
         `${config.backendUrl}/fetch_all_trip?uid=${uid}`
       );
+      const data = await response.json();
       if (!response.ok) {
         set({ trips: data.message, loading: false });
         throw new Error("Failed to fetch trips");
       }
-      const data = await response.json();
+      
       set({ trips: data.trips, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
