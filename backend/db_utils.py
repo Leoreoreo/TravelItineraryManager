@@ -257,7 +257,35 @@ def fetch_stops(trip_id):
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
+
+def remove_trip(trip_id):
+    """ delete trip from db """
+    create_connection_pool()
+    conn = None
+    cursor = None
     
+    try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
+        
+        # fetch the user from the users table
+        sql =  "DELETE FROM trips WHERE trip_id = %s"
+        val = (trip_id,)
+        cursor.execute(sql, val)
+        conn.commit()
+
+        logging.info(f"Remove the trip")
+        return trip_id
+
+    except Exception as e:
+        logging.error(f"Error remove trip: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
     
         
 

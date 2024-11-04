@@ -10,8 +10,6 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import config from "../config";
-import { useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useTripStore from "../store/tripStore";
 
@@ -21,15 +19,14 @@ const Home = ({ user }) => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const uid = useAuthStore((state) => state.uid);
-  const navigate = useNavigate();
-  const { trips, loading, error, fetchTrips, addTrip } = useTripStore();
+  const { trips, loading, error, fetchTrips, addTrip, removeTrip } = useTripStore();
 
   useEffect(() => {
     setActiveLink("/");
   }, []);
 
   useEffect(() => {
-    if (uid && trips.length == 0) {
+    if (uid && trips.length === 0) {
       fetchTrips(uid);
     }
   }, [uid]);
@@ -63,6 +60,10 @@ const Home = ({ user }) => {
     }
   };
 
+  const handleDelete = (trip_id) => {
+    removeTrip(trip_id)
+  }
+
   return (
     <div>
       <br />
@@ -73,7 +74,7 @@ const Home = ({ user }) => {
         <br />
         {trips &&
           trips.map(({ trip_id, trip_name, start_date, end_date }) => (
-            <h2 key={trip_id}>
+            <h2 className="trips" key={trip_id}>
               <Link
                 to={`/trip/${trip_id}`}
                 className={activeLink === `/trip/${trip_id}` ? "active" : ""}
@@ -81,6 +82,7 @@ const Home = ({ user }) => {
               >
                 {trip_name}
               </Link>
+              <button className="delete-trip-button" onClick={()=>handleDelete(trip_id)}>x</button>
             </h2>
           ))}
         <br />

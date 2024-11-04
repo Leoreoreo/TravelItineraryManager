@@ -44,6 +44,20 @@ h3 {
   text-align: center;
   font-weight: bold;
 }
+.trips {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.delete-trip-button {
+  height: 30px;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 form {
   display: flex;
   flex-direction: column;
@@ -52,7 +66,7 @@ form {
   align-items: center;
 }
 button {
-  margin-top: 10px;
+  margin: 2px;
   padding: 10px;
   border: 1px;
   border-radius: 10px; 
@@ -62,6 +76,7 @@ button {
 }
 button:hover {
   background-color: grey;
+  cursor: pointer;
 }
 
 .navbar {

@@ -114,6 +114,16 @@ def fetchStops():
     else:
         return jsonify({'error': 'Fail to fetch all stops.'}), 401
 
+@app.route('/removetrip', methods=['DELETE'])
+def removeTrip():
+    data = request.json
+    trip_id = data.get('trip_id')
+
+    trip_id = remove_trip(trip_id)
+    if trip_id:
+        return jsonify({'message': 'Remove successful.', "trip_id": trip_id}), 200
+    return jsonify({'error': 'Fail to remove trip.'}), 401
+
 @app.route('/db_version', methods=['GET'])
 def version():
     """Get the PostgreSQL database version."""
