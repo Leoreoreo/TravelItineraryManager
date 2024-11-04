@@ -26,7 +26,7 @@ function App() {
         <Route path="/user/" element={<User user = {user}/>} />
         <Route path="/signin/" element={<SignIn />} />
         <Route path="/register/" element={<Register />} />
-        <Route path="/trip/:id" element={<Schedule />} />
+        <Route path="/trip/:trip_id" element={<Schedule />} />
       </Routes>
     </PageLayout>
   );

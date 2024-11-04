@@ -17,7 +17,7 @@ const useTripStore = create((set) => ({
       );
       const data = await response.json();
       if (!response.ok) {
-        set({ trips: data.message, loading: false });
+        set({ error: data.message, loading: false });
         throw new Error("Failed to fetch trips");
       }
       
@@ -39,7 +39,25 @@ const useTripStore = create((set) => ({
         throw new Error("Failed to add trip");
       }
       const data = await response.json();
-      set((state) => ({ trips: [...state.trips, data.trip], loading: false }));
+      set((state) => ({ trips: [...state.trips, data.trip], loading: false })); // { trip_id, trip_name, start_date, end_date }
+    } catch (error) {
+      set({ error: error.message, loading: false });
+    }
+  },
+
+  removeTrip: async (trip_id) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await fetch(`${config.backendUrl}/removetrip`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trip_id }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to remove trip");
+      }
+      const data = await response.json();
+      set((state) => ({ trips: state.trips.filter(trip => trip.trip_id !== trip_id), loading: false }));
     } catch (error) {
       set({ error: error.message, loading: false });
     }

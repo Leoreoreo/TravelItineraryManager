@@ -6,6 +6,7 @@ import logging
 import atexit
 from db_utils import *
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -58,7 +59,7 @@ def fetchAllTrips():
 
     trips = fetch_all_trips(uid)
     print("trips are", trips)
-    if trips:
+    if trips != None:
         return jsonify({'message': 'Fetch successful.', "trips": trips}), 200
     else:
         return jsonify({'error': 'Fail to fetch all trips.'}), 401
@@ -74,6 +75,54 @@ def addTrip():
         return jsonify({"trip": trip}), 200
     return jsonify({'error': 'fail to add trip into database'}), 401
 
+@app.route('/addstop', methods=['POST'])
+def addStop():
+    data = request.json
+
+    trip_id = data.get('trip_id')
+    title = data.get('title')
+    type = data.get('type')
+    startDate = data.get('startDate')
+    startHour = data.get('startHour')
+    startMinute = data.get('startMinute')
+    endDate = data.get('endDate')
+    endHour = data.get('endHour')
+    endMinute = data.get('endMinute')
+    location = data.get('location')
+    link = data.get('link')
+    description = data.get('description')
+
+    startDateObj = datetime.strptime(startDate, "%Y-%m-%d")
+    start_time = datetime(startDateObj.year, startDateObj.month, startDateObj.day, int(startHour), int(startMinute))
+    endDateObj = datetime.strptime(endDate, "%Y-%m-%d")
+    end_time = datetime(endDateObj.year, endDateObj.month, endDateObj.day, int(endHour), int(endMinute))
+
+    event_id = add_stop_to_db(trip_id, title, type, start_time, end_time, location, description, link)
+    if event_id:
+        return jsonify({'message': 'Add Stop successful.', "event_id": event_id}), 200
+    return jsonify({'message': 'Fail to stop successful.'}), 401
+
+@app.route('/fetchstops', methods=['GET'])
+def fetchStops():
+    trip_id = request.args.get('trip_id')
+
+    print("trip_id is ", trip_id)
+    stops = fetch_stops(trip_id)
+    print("stops are", stops)
+    if stops != None:
+        return jsonify({'message': 'Fetch successful.', "stops": stops}), 200
+    else:
+        return jsonify({'error': 'Fail to fetch all stops.'}), 401
+
+@app.route('/removetrip', methods=['DELETE'])
+def removeTrip():
+    data = request.json
+    trip_id = data.get('trip_id')
+
+    trip_id = remove_trip(trip_id)
+    if trip_id:
+        return jsonify({'message': 'Remove successful.', "trip_id": trip_id}), 200
+    return jsonify({'error': 'Fail to remove trip.'}), 401
 
 @app.route('/db_version', methods=['GET'])
 def version():
@@ -83,6 +132,7 @@ def version():
         return jsonify({'database_version': db_version}), 200
     else:
         return jsonify({'error': 'Could not fetch database version.'}), 500
+
     
 if __name__ == '__main__':
     app.run(debug=True, port=8081)
