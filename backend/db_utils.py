@@ -120,14 +120,8 @@ def fetch_all_trips(uid):
         # Fetch all rows and convert each to a dictionary
         trips = [dict(zip(columns, row)) for row in trips]
         logging.info(f"trips are {trips}")
-        # valid
-        if trips:  # Check the password
-            logging.info(f"Fetch All trips")
-            return trips
-
-        # invalid
-        logging.info(f"Fetch all trips failed")
-        return None
+        logging.info(f"Fetch All trips")
+        return trips
 
     except Exception as e:
         logging.error(f"Error fetching trips: {str(e)}")
@@ -166,6 +160,97 @@ def add_trip_to_db(title, uid):
         return trip
     except Exception as e:
         logging.error(f"Error adding trip: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
+def add_stop_to_db(trip_id, title, type, start_time, end_time, location, description, link):
+    """ add thestop to the trip in the database"""
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{trip_id}, {title}, {location}, {description}, {start_time}, {end_time}')
+
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
+
+        # Begin a transaction
+        conn.autocommit = False  # Disable autocommit to manage transactions manually
+
+        # insert the user into the events table
+        sql = "INSERT INTO events (trip_id_fk, start_time, end_time, title, link) VALUES (%s, %s, %s, %s, %s) RETURNING event_id"
+        val = (trip_id, start_time, end_time, title, link)
+        cursor.execute(sql, val)
+        event_id = cursor.fetchone()[0]
+
+        # insert the user into the stops table
+        sql = "INSERT INTO stops (event_id, location, description, type) VALUES (%s, %s, %s, %s)"
+        val = (event_id, location, description, type)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        logging.info(f"User add stop successfully")
+        return event_id
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logging.error(f"Error adding stop: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)    
+
+def fetch_stops(trip_id):
+    """ check all trips of a user from db """
+    create_connection_pool()
+    conn = None
+    cursor = None
+    
+    try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
+        
+        # fetch the user from the users table
+        sql =  '''SELECT events.event_id, events.start_time, events.end_time, events.title, events.link, stops.location, stops.description, stops.type
+        FROM events, stops
+        WHERE events.trip_id_fk = %s AND events.event_id = stops.event_id
+        ORDER BY events.start_time, events.end_time
+        '''
+        val = (trip_id,)
+        cursor.execute(sql, val)
+        stops = cursor.fetchall()
+
+        # Get column names from cursor description
+        columns = [desc[0] for desc in cursor.description]
+
+        # Fetch all rows and convert each to a dictionary
+        stops = [dict(zip(columns, row)) for row in stops]
+        for stop in stops:
+            start_time = stop['start_time']
+            stop['startDate'] = start_time.date().isoformat()
+            stop['startHour'] = start_time.hour
+            stop['startMinute'] = start_time.minute
+            del stop['start_time']
+
+            end_time = stop['end_time']
+            stop['endDate'] = end_time.date().isoformat()
+            stop['endHour'] = end_time.hour
+            stop['endMinute'] = end_time.minute
+            del stop['end_time']
+
+        logging.info(f"stops are {stops}")
+        # valid
+        logging.info(f"Fetch All stops")
+        return stops
+
+    except Exception as e:
+        logging.error(f"Error fetching stops: {str(e)}")
         return None
     finally:
         if cursor:

@@ -17,7 +17,7 @@ const useTripStore = create((set) => ({
       );
       const data = await response.json();
       if (!response.ok) {
-        set({ trips: data.message, loading: false });
+        set({ error: data.message, loading: false });
         throw new Error("Failed to fetch trips");
       }
       
