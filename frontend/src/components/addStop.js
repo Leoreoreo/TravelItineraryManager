@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const AddStop = ({ onSave, onCancel, initialData }) => {
+const AddStop = ({ onAdd, onEdit, onCancel, initialData }) => {
   const [tripStop, setTripStop] = useState({
     title: '',
     type: '',
@@ -20,11 +20,31 @@ const AddStop = ({ onSave, onCancel, initialData }) => {
   useEffect(() => {
     if (initialData) {
       setTripStop(initialData); // Pre-fill fields if editing
+      console.log("initial data is ", initialData)
     }
   }, [initialData]);
 
-  const handleSave = () => {
-    onSave(tripStop);
+  const handleAdd = () => {
+    onAdd(tripStop);
+    setTripStop({
+      title: '',
+      type: '',
+
+      startDate: '',
+      startHour: '',
+      startMinute: '',
+      endDate: '',
+
+      endHour: '',
+      endMinute: '',
+      location: '',
+      link: '',
+      description: ''
+    });
+  };
+
+  const handleEdit = () => {
+    onEdit(tripStop);
     setTripStop({
       title: '',
       type: '',
@@ -131,60 +151,7 @@ const AddStop = ({ onSave, onCancel, initialData }) => {
           onChange={(e) => setTripStop({ ...tripStop, description: e.target.value })}
         />
       </label>
-      <label>
-        Start Time:
-        <input
-          type="number"
-          placeholder="Hour"
-          value={tripStop.startHour}
-          onChange={(e) => setTripStop({ ...tripStop, startHour: e.target.value })}
-        />
-        <input
-          type="number"
-          placeholder="Minute"
-          value={tripStop.startMinute}
-          onChange={(e) => setTripStop({ ...tripStop, startMinute: e.target.value })}
-        />
-      </label>
-      <label>
-        End Time:
-        <input
-          type="number"
-          placeholder="Hour"
-          value={tripStop.endHour}
-          onChange={(e) => setTripStop({ ...tripStop, endHour: e.target.value })}
-        />
-        <input
-          type="number"
-          placeholder="Minute"
-          value={tripStop.endMinute}
-          onChange={(e) => setTripStop({ ...tripStop, endMinute: e.target.value })}
-        />
-      </label>
-      <label>
-        Location:
-        <input
-          type="text"
-          value={tripStop.location}
-          onChange={(e) => setTripStop({ ...tripStop, location: e.target.value })}
-        />
-      </label>
-      <label>
-        Link:
-        <input
-          type="url"
-          value={tripStop.link}
-          onChange={(e) => setTripStop({ ...tripStop, link: e.target.value })}
-        />
-      </label>
-      <label>
-        Description:
-        <textarea
-          value={tripStop.description}
-          onChange={(e) => setTripStop({ ...tripStop, description: e.target.value })}
-        />
-      </label>
-      <button onClick={handleSave}>{initialData ? 'Save Changes' : 'Save'}</button>
+      {initialData ? <button onClick={handleEdit}>Save Changes</button> : <button onClick={handleAdd}>Add</button>}
       <button onClick={onCancel}>Cancel</button>
     </div>
   );

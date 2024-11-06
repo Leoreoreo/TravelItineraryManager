@@ -102,6 +102,33 @@ def addStop():
         return jsonify({'message': 'Add Stop successful.', "event_id": event_id}), 200
     return jsonify({'message': 'Fail to stop successful.'}), 401
 
+@app.route('/editstop', methods=['PATCH'])
+def editStop():
+    data = request.json
+
+    event_id = data.get('event_id')
+    title = data.get('title')
+    type = data.get('type')
+    startDate = data.get('startDate')
+    startHour = data.get('startHour')
+    startMinute = data.get('startMinute')
+    endDate = data.get('endDate')
+    endHour = data.get('endHour')
+    endMinute = data.get('endMinute')
+    location = data.get('location')
+    link = data.get('link')
+    description = data.get('description')
+    
+    startDateObj = datetime.strptime(startDate, "%Y-%m-%d")
+    start_time = datetime(startDateObj.year, startDateObj.month, startDateObj.day, int(startHour), int(startMinute))
+    endDateObj = datetime.strptime(endDate, "%Y-%m-%d")
+    end_time = datetime(endDateObj.year, endDateObj.month, endDateObj.day, int(endHour), int(endMinute))
+
+    event_id = edit_stop_to_db(event_id, title, type, start_time, end_time, location, description, link)
+    if event_id:
+        return jsonify({'message': 'Add Stop successful.', "trip": data}), 200
+    return jsonify({'message': 'Fail to stop successful.'}), 401
+
 @app.route('/fetchstops', methods=['GET'])
 def fetchStops():
     trip_id = request.args.get('trip_id')

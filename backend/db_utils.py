@@ -206,6 +206,44 @@ def add_stop_to_db(trip_id, title, type, start_time, end_time, location, descrip
         if conn:
             connection_pool.putconn(conn)    
 
+def edit_stop_to_db(event_id, title, type, start_time, end_time, location, description, link):
+    """ add thestop to the trip in the database"""
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{event_id}, {title}, {location}, {description}, {start_time}, {end_time}')
+
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
+
+        # Begin a transaction
+        conn.autocommit = False  # Disable autocommit to manage transactions manually
+
+        # insert the user into the events table
+        sql = "UPDATE events set start_time = %s, end_time = %s, title = %s, link = %s WHERE event_id = %s"
+        val = (start_time, end_time, title, link, event_id)
+        cursor.execute(sql, val)
+
+        # insert the user into the stops table
+        sql = "UPDATE stops set location = %s, description = %s, type = %s WHERE event_id = %s"
+        val = (location, description, type, event_id)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        logging.info(f"User add stop successfully")
+        return event_id
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logging.error(f"Error adding stop: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)  
+
 def fetch_stops(trip_id):
     """ check all trips of a user from db """
     create_connection_pool()
