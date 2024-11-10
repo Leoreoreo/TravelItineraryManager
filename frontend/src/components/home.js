@@ -1,6 +1,8 @@
 import {
   Box,
   Button,
+  Card,
+  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,18 +14,38 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useTripStore from "../store/tripStore";
+import TripCard from "./TripCard";
 
 const Home = ({ user }) => {
   const [activeLink, setActiveLink] = useState("/");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [message, setMessage] = useState("");
   const uid = useAuthStore((state) => state.uid);
-  const { trips, loading, error, fetchTrips, addTrip, removeTrip } = useTripStore();
+  const { trips, loading, error, fetchTrips, addTrip, removeTrip } =
+    useTripStore();
 
   useEffect(() => {
     setActiveLink("/");
   }, []);
+
+  function getDaysFromTodayToStartDate(startDate) {
+    const start = new Date(startDate);
+
+    // Get today's date with time set to midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Calculate the difference in milliseconds
+    const diffInMs = start - today;
+
+    // Convert milliseconds to days
+    const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24));
+
+    return diffInDays;
+  }
 
   useEffect(() => {
     if (uid && trips.length === 0) {
@@ -44,6 +66,10 @@ const Home = ({ user }) => {
       setMessage("please enter the title");
       return;
     }
+    if (startDate === "" || endDate === "") {
+      setMessage("please enter the date");
+      return;
+    }
     if (!uid) {
       setMessage("please login first");
       return;
@@ -51,58 +77,118 @@ const Home = ({ user }) => {
 
     setMessage("");
 
-    await addTrip(uid, title, null, null); // later need to add start date and end date
+    await addTrip(uid, title, startDate, endDate); // later need to add start date and end date
     if (error) {
       setMessage(error);
     } else {
       setTitle("");
+      setStartDate("");
+      setEndDate("");
       handleClose();
     }
   };
 
-  const handleDelete = (trip_id) => {
-    removeTrip(trip_id)
-  }
+  const handleDelete = (event, trip_id) => {
+    event.preventDefault();
+    removeTrip(trip_id);
+  };
+
+  // the trip card component
 
   return (
     <div>
-      <br />
-      <div>
-        <h1>Welcome, {user}! </h1>
-        <br />
-        <br />
-        <br />
+      <Box
+        sx={{ width: 400, display: "flex", gap: 3, flexDirection: "column" }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4">Trips</Typography>
+          <Typography
+            sx={{
+              color: "#2196f3",
+              cursor: "pointer",
+              "&:hover": { color: "#1976d2" },
+            }}
+            onClick={handleOpen}
+          >
+            + Create a trip
+          </Typography>
+        </Box>
         {trips &&
           trips.map(({ trip_id, trip_name, start_date, end_date }) => (
-            <h2 className="trips" key={trip_id}>
-              <Link
-                to={`/trip/${trip_id}`}
-                className={activeLink === `/trip/${trip_id}` ? "active" : ""}
-                onClick={() => setActiveLink(`/trip/${trip_id}`)}
-              >
-                {trip_name}
-              </Link>
-              <button className="delete-trip-button" onClick={()=>handleDelete(trip_id)}>x</button>
-            </h2>
+            <Link
+              key={trip_id}
+              to={`/trip/${trip_id}`}
+              onClick={() => setActiveLink(`/trip/${trip_id}`)}
+              style={{ textDecoration: "none" }}
+            >
+              <TripCard
+                trip_id={trip_id}
+                title={trip_name}
+                startDate={start_date}
+                endDate={end_date}
+                daysLeft={getDaysFromTodayToStartDate(start_date)}
+                onDelete={handleDelete}
+              />
+            </Link>
           ))}
-        <br />
-        <br />
-        <br />
-        <h2>
-          <Button onClick={handleOpen}>Add Trip</Button>
-        </h2>
-      </div>
+      </Box>
+      {/* <button
+                className="delete-trip-button"
+                onClick={() => handleDelete(trip_id)}
+              >
+                x
+              </button> */}
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Start a new trip!</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
-            <Typography variant="h6">Title:</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+              Title:
+            </Typography>
             <TextField
               hiddenLabel
+              fullWidth
+              type="text"
               size="small"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
+            />
+
+            <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+              Start Date:
+            </Typography>
+            <TextField
+              hiddenLabel
+              fullWidth
+              type="date"
+              size="small"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
+            <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+              End Date:
+            </Typography>
+            <TextField
+              hiddenLabel
+              fullWidth
+              type="date"
+              size="small"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
             />
           </Box>
           {message.length !== 0 && (
@@ -112,7 +198,7 @@ const Home = ({ user }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddTrip} autoFocus>
+          <Button onClick={handleAddTrip} color="black" autoFocus>
             Add
           </Button>
         </DialogActions>

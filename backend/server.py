@@ -68,9 +68,11 @@ def fetchAllTrips():
 def addTrip():
     data = request.json
     title = data.get('title')
+    startDate = data.get('startDate')
+    endDate = data.get('endDate')
     uid = data.get('uid')
 
-    trip = add_trip_to_db(title, uid)
+    trip = add_trip_to_db(title, uid, startDate, endDate)
     if trip:
         return jsonify({"trip": trip}), 200
     return jsonify({'error': 'fail to add trip into database'}), 401

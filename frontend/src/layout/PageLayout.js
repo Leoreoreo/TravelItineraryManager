@@ -60,7 +60,15 @@ const PageLayout = ({ children }) => {
           </Grid>
         </Grid>
       ) : (
-        <div>{children}</div>
+        <div>
+          <Container>
+            <Box
+              sx={{ display: "flex", padding: 5, justifyContent: "center"}}
+            >
+              {children}
+            </Box>
+          </Container>
+        </div>
       )}
     </div>
   );
