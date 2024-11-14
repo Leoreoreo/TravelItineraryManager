@@ -132,7 +132,7 @@ def fetch_all_trips(uid):
         if conn:
             connection_pool.putconn(conn)
 
-def add_trip_to_db(title, uid):
+def add_trip_to_db(title, uid, startDate, endDate):
     """ add the trip to the database"""
     create_connection_pool()
     conn = None
@@ -144,8 +144,8 @@ def add_trip_to_db(title, uid):
         cursor = conn.cursor()
 
         # insert the user into the users table
-        sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-        val = (uid, title)
+        sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+        val = (uid, title, startDate, endDate)
         cursor.execute(sql, val)
         trip = cursor.fetchone()
         conn.commit()
