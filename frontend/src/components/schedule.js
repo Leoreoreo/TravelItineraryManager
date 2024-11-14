@@ -1,6 +1,6 @@
 // Schedule.js
 import React, { useState, useEffect } from "react";
-import GoogleMap from "./googleMap";
+import MapComponent from "./googleMap";
 import AddStop from "./addStop"; // Import the AddStop component
 import { useParams } from "react-router-dom";
 import config from "../config";
@@ -87,10 +87,16 @@ const Schedule = () => {
       })
       .catch((error) => [console.log(error)]);
   };
-
+  const addresses = [
+    'Knott Hall, Notre Dame, IN', 
+    'Debartoo Hall, Notre Dame, IN',
+    'Potawatomi Zoo, South Bend, IN'
+  ];
   return (
     <div>
-      <GoogleMap />
+      <MapComponent 
+        addresses={addresses}
+      />
       <div className="schedule">
         <h1>New Trip</h1>
         <button onClick={handleAddClick}>Add Trip Stop</button>
