@@ -45,7 +45,7 @@ const TripCard = ({
         }}
       >
         <Typography variant="caption" color="white">
-          {daysLeft} days to go
+          {daysLeft > 0 ? `${daysLeft} days to go` : daysLeft == 0 ? "Now" : "Past"}
         </Typography>
       </Box>
       <Box

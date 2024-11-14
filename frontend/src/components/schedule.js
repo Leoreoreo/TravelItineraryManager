@@ -4,7 +4,7 @@ import MapComponent from "./googleMap";
 import AddStop from "./addStop"; // Import the AddStop component
 import { useParams } from "react-router-dom";
 import config from "../config";
-import { accordionClasses } from "@mui/material";
+import { accordionClasses, Box } from "@mui/material";
 
 const Schedule = () => {
   const { trip_id } = useParams();
@@ -94,9 +94,11 @@ const Schedule = () => {
   ];
   return (
     <div>
-      <MapComponent 
-        addresses={addresses}
-      />
+      <Box className="googleMap">
+        <MapComponent 
+          addresses={addresses}
+        />
+      </Box>
       <div className="schedule">
         <h1>New Trip</h1>
         <button onClick={handleAddClick}>Add Trip Stop</button>

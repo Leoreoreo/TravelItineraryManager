@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 // Define Google Maps options with useMemo to avoid recreating the object
 const MapComponent = ({ addresses }) => {
@@ -46,7 +47,7 @@ const MapComponent = ({ addresses }) => {
         }
     }, [isLoaded, calculateRoute]);
 
-    return isLoaded ? (
+    return false ? (
         <div className="googleMap">
             <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -57,7 +58,10 @@ const MapComponent = ({ addresses }) => {
             </GoogleMap>
         </div>
     ) : (
-        <p>Loading...</p>
+        <Box sx={{display: "flex", flexDirection:"column", justifyContent:"center", alignItems: "center", height: "90vh"}}>
+            <Typography>Loading the map</Typography>
+            <CircularProgress />
+        </Box>
     );
 };
 
