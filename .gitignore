@@ -1,5 +1,9 @@
 *.DS_Store
 
+# Pycache
+__pycache__
+*__pycache__*
+
 # VENV
 venv
 
