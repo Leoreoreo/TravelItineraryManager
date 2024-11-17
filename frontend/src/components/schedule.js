@@ -4,8 +4,6 @@ import MapComponent from "./googleMap";
 import AddStop from "./addStop"; // Import the AddStop component
 import { useParams } from "react-router-dom";
 import config from "../config";
-import { accordionClasses } from "@mui/material";
-
 const Schedule = () => {
   const { trip_id } = useParams();
 
@@ -13,11 +11,13 @@ const Schedule = () => {
   const [showModal, setShowModal] = useState(false);
   const [tripStops, setTripStops] = useState([]); // State to hold the trip stops
   const [editingStop, setEditingStop] = useState(null); // State to track the stop being edited
+  const [addresses, setAddresses] = useState([]);
 
   useEffect(() => {
     setFadeIn(true);
   }, []);
 
+  // Fetch stops when component mounts
   useEffect(() => {
     const fetchStops = async () => {
       try {
@@ -37,6 +37,13 @@ const Schedule = () => {
     fetchStops();
   }, [trip_id]);
 
+  // Automatically update addresses when tripStops changes
+  useEffect(() => {
+    const locations = tripStops.map((stop) => stop.location).filter(Boolean);
+    setAddresses(locations);
+    console.log("Updated addresses:", locations);
+  }, [tripStops]);
+
   const handleAddClick = () => {
     setEditingStop(null); // Reset editingStop when adding a new stop
     setShowModal(true);
@@ -55,7 +62,7 @@ const Schedule = () => {
         setTripStops([...tripStops, newStop]); // Append the new trip stop
         setShowModal(false); // Close the modal after saving
       })
-      .catch((error) => [console.log(error)]);
+      .catch((error) => console.log(error));
   };
 
   const handleEditClick = (index) => {
@@ -73,30 +80,20 @@ const Schedule = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("event_id is ", data.event_id);
-        const trip = data.trip;
-        const newTrip = [];
-        for (const t of tripStops) {
-          if (t.event_id == trip.event_id) {
-            newTrip.push(trip);
-          } else {
-            newTrip.push(t);
-          }
-        }
-        setTripStops(newTrip);
+        const updatedStops = tripStops.map((stop) =>
+          stop.event_id === tripStop.event_id ? tripStop : stop
+        );
+        setTripStops(updatedStops); // Update tripStops
         setShowModal(false); // Close the modal after saving
       })
-      .catch((error) => [console.log(error)]);
+      .catch((error) => console.log(error));
   };
-  const addresses = [
-    'Knott Hall, Notre Dame, IN', 
-    'Debartoo Hall, Notre Dame, IN',
-    'Potawatomi Zoo, South Bend, IN'
-  ];
+
   return (
     <div>
-      <MapComponent 
+      {/* <MapComponent 
         addresses={addresses}
-      />
+      /> */}
       <div className="schedule">
         <h1>New Trip</h1>
         <button onClick={handleAddClick}>Add Trip Stop</button>
