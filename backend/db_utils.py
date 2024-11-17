@@ -168,7 +168,7 @@ def add_trip_to_db(title, uid, startDate, endDate):
             connection_pool.putconn(conn)
 
 def add_stop_to_db(trip_id, title, type, start_time, end_time, location, description, link):
-    """ add thestop to the trip in the database"""
+    """ add the stop to the trip in the database"""
     create_connection_pool()
     conn = None
     cursor = None
