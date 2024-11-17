@@ -1,0 +1,17 @@
+ user_id |                                                                              password                                                                              | username  | trait | age 
+---------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------+-------+-----
+       1 | test                                                                                                                                                               | test_name |       |    
+       2 | scrypt:32768:8:1$VjNhI5M3F2kteGxi$ec2a31367ab351d80a5240ed4f5ce4ba42c2b9eeb9b552d6f70f0884ea7e9bbaf6615bf35913849bd2ef7e453771e8a50395fd0ea4d8a3a876e0645eb2c7fae1 | dkim37    |       |    
+       3 | scrypt:32768:8:1$MBqPNJMajoPkD4NZ$19e6d3f3f880206e55b27fdda27410f988c552fcfbb188730a01ba1125875cb47427402f41d173adcf9a0ed7de7884924862b731c91a8bec5669d1157e3eea8b | leoreoreo |       |    
+       4 | scrypt:32768:8:1$r2832SiBX2SmVA0L$6df51e9e77751e8bfb4dce5e5fc766780dceaf73bf9590224504b6f4fe238860cdb4d23b05b6ac49e5e18f2835cbd9f99f5259869438c873566578e0d8d30f42 | leoreo    |       |    
+       5 | scrypt:32768:8:1$6NGxSvlck8Jaqb64$57628ec5a04cd58793b8f1fedbc0cb82c30ac713f02afa69fd9b395e77fa1abe94ac985be8391a7a7fdad8f498619844d0656fcc470194ee03d73bcd4c5479c3 | luke      |       |    
+       6 | scrypt:32768:8:1$l2XGu3H8E7w7szH4$27042a5f1481efa16db709ffdcdcb23528099856208bff863d2e3666e7db3ef974e386fa1e9382121fc48f63b5ac0e3d3fc2a6a15c9fe22c07aad539240b55b8 | luke1     |       |    
+       7 | scrypt:32768:8:1$YliBNyGqwC39jNBU$e50efec5ea51fa7aed191db898aba8a65e9b138a78e4a35ad6eddf520c248c95e426741394fd93122ff21fd1d3b2a2a4739d1c2f9e9234191154d794a1e08455 | johnkimdw |       |    
+       8 | scrypt:32768:8:1$ZjywMtATc3dnHHAo$06ac311db27f832d081b0566ac96651c1e6e8698ef773aaa6d837bbe1f1a39a1d1bd77a005a9bee69602ce0dcefca56263a15875b11a634715e4692ad84471c1 | fucker    |       |    
+       9 | scrypt:32768:8:1$BS4LpIrhD3E5IQzX$9837fc979d38d83d853c2d4c829c4039f62b5f179044e98aa4c12f097b02f120c0187045f5a5714de1eb6c2f44f15796693857b3014b009b8d9faad0fe89ad78 | rshi2     |       |    
+      10 | scrypt:32768:8:1$bDDleC7a5fTbJjVE$e43f8f51df2c50dc03737310f0dc75d91acdf2da6848314ab8d6efd710aa1028825400d05769cdfdf64f17dbac0cb8d2942364a5d819615f703c61c06c5e41b4 | renee     |       |    
+      11 | scrypt:32768:8:1$iabkLfelKiaBQy20$8546d238653039214ff9d0ebc1c62f00f4287fbfbe4e5cf64cbb3071d8ddaf1b01a6ef0309306a58f62847a5e90146321e88009b6d27e831648d0b69f4f4a5d2 | bang      |       |    
+      12 | scrypt:32768:8:1$sKnQBxn53XXHWZZF$5968d1355e200bdba2bd7ae1b58f13edf3622eb1818d8283135bf9b027f7e62d0c18615ec72f940ff0dc2c46a25739f6ec9237bf9bfc8f168d57cc250c5ea07b | wow       |       |    
+      13 | scrypt:32768:8:1$5KfBKFopi12l1GcQ$3de11440efaa182ea09b564685942d463de3f08e32a2da504c8d2889198f745b38148e48ecd5f03e573f48b91958f14971bbc12280df6ccb03fe49cc0ae004fc | tweninger |       |    
+(13 rows)
+
