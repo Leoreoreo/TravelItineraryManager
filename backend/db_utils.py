@@ -141,6 +141,7 @@ def fetch_all_trips(uid):
             connection_pool.putconn(conn)
 
 def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
+
     """ add the trip to the database"""
     create_connection_pool()
     conn = None
@@ -181,7 +182,7 @@ def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
-            
+      
 def create_event(trip_id, start_time, end_time, title, link):
     """ create an event in the database and return its id """
     create_connection_pool()

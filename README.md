@@ -42,9 +42,10 @@ Default: http://127.0.0.1:8081
 ## Database 
 - Postgresql (should be always on since the server is on 24/7, so you can remote access)
 - Infrastructure: AWS (EC2)
+- Current ip address: 18.216.204.24
 
 ### Usage 
-1. `$ psql --host 18.222.124.5 --username db\_user1 --password --dbname tim\_db`
+1. `$ psql --host 18.216.204.24 --username db\_user1 --password --dbname tim\_db`
 2. will ask for pw so enter it
 3. you can do any kind of sql stuff you want here (e.g. create, alter, insert, select)
 ### Production

@@ -15,9 +15,9 @@ root.render(
   // App: a function (App.js)
   <BrowserRouter>
     <ThemeProvider theme={theme}>
-      <React.StrictMode>
+      {/* <React.StrictMode> */}
         <App />
-      </React.StrictMode>
+      {/* </React.StrictMode> */}
     </ThemeProvider>
   </BrowserRouter>
 );
