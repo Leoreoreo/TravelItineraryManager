@@ -5,7 +5,6 @@ from psycopg2 import pool
 import logging
 import atexit
 from db_utils import *
-from helper import *
 from flask_cors import CORS
 from datetime import datetime
 
@@ -151,66 +150,7 @@ def removeTrip():
     if trip_id:
         return jsonify({'message': 'Remove successful.', "trip_id": trip_id}), 200
     return jsonify({'error': 'Fail to remove trip.'}), 401
-'''
-@app.route('/add_bots', methods=['GET'])
-def add_bot_trips():
-    preferences = ['Sightseer', 'Adventurer', 'Historian', 'Artist', 'Foodie', 'Family', 'Solo', 'Nature', 'Luxury', 'Budget']
-    ages = [18, 21, 30, 45]
-    all_trips = []
-    i = 0
-    uid = 10000
-    tid = 10000
-    # uid = 17
-    # tid = 30
-    # for every pref
-    for p in preferences:
-        # each age
-        for a in ages:
-            if p in preferences[0:4]: filename = f"/home/ubuntu/trip_data/trip_{p}_{a}_size_200.csv"
-            else: filename = f"/home/ubuntu/trip_data/trip_{p}_{a}_size_300.csv"
-            curr_trips = csv_to_trips(filename)
-            # now for the specific preference and age
-            print(i)
-            for t in curr_trips:
-                i += 1
-                # print(t['trip_name'])
-                # create user
-                if not register_user(f"{p}_{a}_{i}", "1234", uid + i, p, a):
-                    print(f"failed to register user {uid + i}")
-                    continue
-                # create trip
-                if not add_trip_to_db(t['trip_name'], uid + i, tid + i, t['start_date'], t['end_date']):
-                    print(f"failed to add trip for user {uid + i} for trip {tid + i}")
-                    continue
-                # create events
-                    # stops + commutes
-                for ev in t['events']:
-                    if ev['type'] == "stop":
-                        add_stop_to_db(tid + i, ev['location'], ev['type'], ev['start_time'], ev['end_time'], ev['location'], "", "", weather=ev['preferred_weather'])
-                    elif ev['type'] == "commute":
-                        add_commute_to_db(tid + i, ev['mode'], ev['type'], ev['start_time'], ev['end_time'], ev['location_start'], ev['location_end'], ev['mode'])
-                    else:
-                        print(f"failed to add event for user {uid + i} for trip {tid + i}")
-                        continue
-        
-    return curr_trips
-                
-    
-    # data = request.get_json()
-    # username = data.get('username')
-    # password = data.get('password')
 
-    # if not username or not password:
-    #     print('Username and password are required.')
-    #     return jsonify({'error': 'Username and password are required.'}), 400
-
-    # if register_user(username, password):
-    #     print('User registered successfully.')
-    #     return jsonify({'message': 'User registered successfully.'}), 201
-    # else:
-    #     print('User registration failed.')
-    #     return jsonify({'error': 'User registration failed.'}), 500
-'''
 @app.route('/db_version', methods=['GET'])
 def version():
     """Get the PostgreSQL database version."""
@@ -220,5 +160,6 @@ def version():
     else:
         return jsonify({'error': 'Could not fetch database version.'}), 500
 
+    
 if __name__ == '__main__':
     app.run(debug=True, port=8081)

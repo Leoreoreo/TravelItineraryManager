@@ -15,14 +15,13 @@ def create_connection_pool():
         logging.info("Creating connection pool...")
         connection_pool = psycopg2.pool.SimpleConnectionPool(
             1,  # minimum number of connections
-            4,  # maximum number of connections
+            10,  # maximum number of connections
             host=current_app.config['DB_HOST'],
             port=current_app.config['DB_PORT'],
             database=current_app.config['DB_NAME'],
             user=current_app.config['DB_USERNAME'],
             password=current_app.config['DB_PASSWORD']
         )
-
 
 def free_connection_pool():
     """ free the connection pool and close all connections """
@@ -33,7 +32,7 @@ def free_connection_pool():
         logging.info("Connection pool closed.")
         connection_pool = None  # remove the reference to the pool
 
-def register_user(username, password, user_id=None, trait=None, age=None):
+def register_user(username, password):
     """ register a new user """
     create_connection_pool()
     conn = None
@@ -49,15 +48,8 @@ def register_user(username, password, user_id=None, trait=None, age=None):
         logging.info(f'{hashed_password}, {len(hashed_password)}')
 
         # insert the user into the users table
-        if not trait:
-            sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
-            val = (username, hashed_password)
-        elif user_id:
-            sql = "INSERT INTO users (user_id, username, password, trait, age) VALUES (%s, %s, %s, %s, %s)"
-            val = (user_id, username, hashed_password, trait, age)
-        else:
-            sql = "INSERT INTO users (username, password, trait) VALUES (%s, %s, %s)"
-            val = (username, hashed_password, trait)
+        sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
+        val = (username, hashed_password)
         cursor.execute(sql, val)
         conn.commit()
         
@@ -140,7 +132,7 @@ def fetch_all_trips(uid):
         if conn:
             connection_pool.putconn(conn)
 
-def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
+def add_trip_to_db(title, uid):
     """ add the trip to the database"""
     create_connection_pool()
     conn = None
@@ -152,15 +144,8 @@ def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
         cursor = conn.cursor()
 
         # insert the user into the users table
-        if not start_date or not end_date:
-            sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-            val = (uid, title)
-        elif tid:
-            sql = "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-            val = (tid, uid, title, start_date, end_date)
-        else:
-            sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-            val = (uid, title, start_date, end_date)
+        sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+        val = (uid, title)
         cursor.execute(sql, val)
         trip = cursor.fetchone()
         conn.commit()
@@ -181,75 +166,34 @@ def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
-            
-def create_event(trip_id, start_time, end_time, title, link):
-    """ create an event in the database and return its id """
+
+def add_stop_to_db(trip_id, title, type, start_time, end_time, location, description, link):
+    """ add thestop to the trip in the database"""
     create_connection_pool()
     conn = None
     cursor = None
+    logging.info(f'{trip_id}, {title}, {location}, {description}, {start_time}, {end_time}')
 
     try:
-        conn = connection_pool.getconn()
+        conn = connection_pool.getconn()  # get a connection from the pool
         cursor = conn.cursor()
 
-        sql = """
-        INSERT INTO events (trip_id_fk, start_time, end_time, title, link) 
-        VALUES (%s, %s, %s, %s, %s) 
-        RETURNING event_id
-        """
-        
+        # Begin a transaction
+        conn.autocommit = False  # Disable autocommit to manage transactions manually
+
+        # insert the user into the events table
+        sql = "INSERT INTO events (trip_id_fk, start_time, end_time, title, link) VALUES (%s, %s, %s, %s, %s) RETURNING event_id"
         val = (trip_id, start_time, end_time, title, link)
         cursor.execute(sql, val)
         event_id = cursor.fetchone()[0]
-        conn.commit()
-        
-        return event_id
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        logging.error(f"Error creating event: {str(e)}")
-        return None
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            connection_pool.putconn(conn)
-            
-def add_stop_to_db(trip_id, title, event_type, start_time, end_time, location, description, link, weather=None):
-    """Add a stop to the trip in the database."""
-    create_connection_pool()
-    conn = None
-    cursor = None
-    logging.info(f'{trip_id}, {title}, {location}, {event_type}, {description}, {start_time}, {end_time}')
 
-    try:
-        # Use the `create_event` function to handle event creation
-        event_id = create_event(trip_id, start_time, end_time, title, "")
-        if event_id is None: raise Exception("Failed to create event")
-
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
-
-        # Begin a transaction for the stop insertion
-        conn.autocommit = False
-
-        if event_id and location and description and event_type and weather:
-            sql = """
-            INSERT INTO stops (event_id, location, description, type, preferred_weather) 
-            VALUES (%s, %s, %s, %s, %s)
-            """
-            val = (event_id, location, description, event_type, weather)
-        else: 
-            # Insert into the stops table
-            sql = """
-            INSERT INTO stops (event_id, location, description, type) 
-            VALUES (%s, %s, %s, %s)
-            """
-            val = (event_id, location, description, event_type)
+        # insert the user into the stops table
+        sql = "INSERT INTO stops (event_id, location, description, type) VALUES (%s, %s, %s, %s)"
+        val = (event_id, location, description, type)
         cursor.execute(sql, val)
+
         conn.commit()
-        
-        logging.info(f"Stop added successfully")
+        logging.info(f"User add stop successfully")
         return event_id
     except Exception as e:
         if conn:
@@ -260,93 +204,7 @@ def add_stop_to_db(trip_id, title, event_type, start_time, end_time, location, d
         if cursor:
             cursor.close()
         if conn:
-            connection_pool.putconn(conn)
-            
-def add_commute_to_db(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
-    """Add a stop to the trip in the database."""
-    create_connection_pool()
-    conn = None
-    cursor = None
-    logging.info(f'{trip_id}, {title}, {event_type}, {start_time}, {end_time}, {location_start}, {location_end} , {vehicle}')
-
-    try:
-        # Use the `create_event` function to handle event creation
-        event_id = create_event(trip_id, start_time, end_time, title, "")
-        if event_id is None: raise Exception("Failed to create event")
-
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
-
-        # Begin a transaction for the stop insertion
-        conn.autocommit = False
-
-        if event_id and location_start and location_end and vehicle:
-            sql = """
-            INSERT INTO commutes (event_id, location_start, location_end, vehicle) 
-            VALUES (%s, %s, %s, %s)
-            """
-            val = (event_id, location_start, location_end, vehicle)
-        else: 
-            # Insert into the stops table
-            sql = """
-            INSERT INTO commutes (event_id, location_start) 
-            VALUES (%s, %s)
-            """
-            val = (event_id, location_start)
-        cursor.execute(sql, val)
-        conn.commit()
-        
-        logging.info(f"Commute added successfully")
-        return event_id
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        logging.error(f"Error adding commute: {str(e)}")
-        return None
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            connection_pool.putconn(conn)
-
-# def add_stop_to_db(trip_id, title, type, start_time, end_time, location, description, link):
-#     """ add thestop to the trip in the database"""
-#     create_connection_pool()
-#     conn = None
-#     cursor = None
-#     logging.info(f'{trip_id}, {title}, {location}, {description}, {start_time}, {end_time}')
-
-#     try:
-#         conn = connection_pool.getconn()  # get a connection from the pool
-#         cursor = conn.cursor()
-
-#         # Begin a transaction
-#         conn.autocommit = False  # Disable autocommit to manage transactions manually
-
-#         # insert the user into the events table
-#         sql = "INSERT INTO events (trip_id_fk, start_time, end_time, title, link) VALUES (%s, %s, %s, %s, %s) RETURNING event_id"
-#         val = (trip_id, start_time, end_time, title, link)
-#         cursor.execute(sql, val)
-#         event_id = cursor.fetchone()[0]
-
-#         # insert the user into the stops table
-#         sql = "INSERT INTO stops (event_id, location, description, type) VALUES (%s, %s, %s, %s)"
-#         val = (event_id, location, description, type)
-#         cursor.execute(sql, val)
-
-#         conn.commit()
-#         logging.info(f"User add stop successfully")
-#         return event_id
-#     except Exception as e:
-#         if conn:
-#             conn.rollback()
-#         logging.error(f"Error adding stop: {str(e)}")
-#         return None
-#     finally:
-#         if cursor:
-#             cursor.close()
-#         if conn:
-#             connection_pool.putconn(conn)    
+            connection_pool.putconn(conn)    
 
 def edit_stop_to_db(event_id, title, type, start_time, end_time, location, description, link):
     """ add thestop to the trip in the database"""
