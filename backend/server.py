@@ -151,6 +151,7 @@ def removeTrip():
     if trip_id:
         return jsonify({'message': 'Remove successful.', "trip_id": trip_id}), 200
     return jsonify({'error': 'Fail to remove trip.'}), 401
+
 '''
 @app.route('/add_bots', methods=['GET'])
 def add_bot_trips():
@@ -211,6 +212,7 @@ def add_bot_trips():
     #     print('User registration failed.')
     #     return jsonify({'error': 'User registration failed.'}), 500
 '''
+
 @app.route('/db_version', methods=['GET'])
 def version():
     """Get the PostgreSQL database version."""

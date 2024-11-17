@@ -47,7 +47,7 @@ def register_user(username, password, user_id=None, trait=None, age=None):
         # hash the password
         hashed_password = generate_password_hash(password)
         logging.info(f'{hashed_password}, {len(hashed_password)}')
-
+		
         # insert the user into the users table
         if not trait:
             sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
