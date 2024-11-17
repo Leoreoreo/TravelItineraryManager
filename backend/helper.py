@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 
-
+# this is to convert csv (stores all trip data) into an array of dictionaries to later push into the psql db
 def validate_row(start_date, end_date, start_time, end_time, event_type, location, location_start, location_end, weather):
     try:
         datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
