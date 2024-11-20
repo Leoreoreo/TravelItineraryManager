@@ -47,7 +47,7 @@ const MapComponent = ({ addresses }) => {
         }
     }, [isLoaded, calculateRoute]);
 
-    return false ? (
+    return isLoaded ? (
         <div className="googleMap">
             <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '100%' }}
