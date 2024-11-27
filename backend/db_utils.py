@@ -76,7 +76,7 @@ def authenticate_user(username, password):
         cursor = conn.cursor()
         
         # fetch the user from the users table
-        sql =  "SELECT user_id, password FROM users WHERE username = %s"
+        sql =  "SELECT user_id, password, trait, bod FROM users WHERE username = %s"
         val = (username,)
         cursor.execute(sql, val)
         user = cursor.fetchone()
@@ -84,7 +84,12 @@ def authenticate_user(username, password):
         # valid
         if user and check_password_hash(user[1], password):  # Check the password
             logging.info(f"User validated: {username}")
-            return user[0]
+            data = {
+                "uid": user[0],
+                "trait": user[2],
+                "bod": user[3]
+            }
+            return data
 
         # invalid
         logging.info(f"User validation failed: {username}")
@@ -92,6 +97,64 @@ def authenticate_user(username, password):
 
     except Exception as e:
         logging.error(f"Error validating user: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
+def update_trait_to_db(uid, trait):
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{uid}, {trait}')
+
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
+
+        # insert the user into the stops table
+        sql = "UPDATE users set trait = %s WHERE user_id = %s"
+        val = (trait, uid)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        logging.info(f"User update trait successfully")
+        return uid
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logging.error(f"Error updating trait: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
+def update_bod_to_db(uid, bod):
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{uid}, {bod}')
+
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
+
+        # insert the user into the stops table
+        sql = "UPDATE users set bod = %s WHERE user_id = %s"
+        val = (bod, uid)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        logging.info(f"User updates birth of date successfully")
+        return uid
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logging.error(f"Error updating birth of date: {str(e)}")
         return None
     finally:
         if cursor:
