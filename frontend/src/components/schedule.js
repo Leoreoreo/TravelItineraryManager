@@ -273,11 +273,11 @@ const Schedule = () => {
     );
   };
 
-  const addresses = [
-    "Knott Hall, Notre Dame, IN",
-    "Debartoo Hall, Notre Dame, IN",
-    "Potawatomi Zoo, South Bend, IN",
-  ];
+  // const addresses = [
+  //   "Knott Hall, Notre Dame, IN",
+  //   "Debartoo Hall, Notre Dame, IN",
+  //   "Potawatomi Zoo, South Bend, IN",
+  // ];
   return (
     <div>
       <Box className="googleMap">
