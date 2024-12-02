@@ -48,11 +48,36 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password are required.'}), 400
 
-    uid = authenticate_user(username, password)
-    if uid:
-        return jsonify({'message': 'Login successful.', "uid": uid}), 200
+    user_date = authenticate_user(username, password)
+    if user_date:
+        return jsonify({'message': 'Login successful.', "data": user_date}), 200
     else:
         return jsonify({'error': 'Invalid username or password.'}), 401
+    
+
+@app.route('/updatebod', methods=['PATCH'])
+def updateBod():
+    data = request.json
+
+    uid = data.get('uid')
+    newBod = data.get('newBod')
+
+    result = update_bod_to_db(uid, newBod)
+    if result:
+        return jsonify({'message': 'Update BOD successful.', "result": result}), 200
+    return jsonify({'message': 'Fail to update BOD.', "result": result}), 401
+
+@app.route('/updatetrait', methods=['PATCH'])
+def updateTrait():
+    data = request.json
+
+    uid = data.get('uid')
+    newTrait = data.get('newTrait')
+
+    result = update_trait_to_db(uid, newTrait)
+    if result:
+        return jsonify({'message': 'Update BOD successful.', "result": result}), 200
+    return jsonify({'message': 'Fail to update BOD.', "result": result}), 401
     
 @app.route('/fetch_all_trip', methods=['GET'])
 def fetchAllTrips():
@@ -132,17 +157,42 @@ def editStop():
         return jsonify({'message': 'Add Stop successful.', "trip": data}), 200
     return jsonify({'message': 'Fail to stop successful.'}), 401
 
-@app.route('/fetchstops', methods=['GET'])
-def fetchStops():
+@app.route('/deleteevent', methods=['DELETE'])
+def deleteEvent():
+    data = request.json
+
+    event_id = data.get('event').get('event_id')
+
+    result = delete_event_from_db(event_id)
+    if result:
+        return jsonify({'message': 'delete event.'}), 200
+    else:
+        return jsonify({'message': 'Fail to delete event.'}), 401
+
+@app.route('/fetchevents', methods=['GET'])
+def fetchEvents():
     trip_id = request.args.get('trip_id')
 
     print("trip_id is ", trip_id)
-    stops = fetch_stops(trip_id)
-    print("stops are", stops)
-    if stops != None:
-        return jsonify({'message': 'Fetch successful.', "stops": stops}), 200
+    events = fetch_events(trip_id)
+    if events != None:
+        return jsonify({'message': 'Fetch successful.', "events": events}), 200
     else:
-        return jsonify({'error': 'Fail to fetch all stops.'}), 401
+        return jsonify({'error': 'Fail to fetch all events.'}), 401
+
+@app.route('/addcommute', methods=['POST'])
+def addCommute():
+    data = request.json
+
+    trip_id = data.get('trip_id')
+    vehicle = data.get('vehicle')
+    start_stop = data.get('start_stop')
+    end_stop = data.get('end_stop')
+    print(trip_id, vehicle, start_stop, end_stop)
+    commute = add_commute_to_db(trip_id, vehicle, start_stop, end_stop)
+    if commute:
+        return jsonify({'message': 'Add Commute successful.', "commute": commute}), 200
+    return jsonify({'message': 'Fail to add commute.'}), 401
 
 @app.route('/removetrip', methods=['DELETE'])
 def removeTrip():

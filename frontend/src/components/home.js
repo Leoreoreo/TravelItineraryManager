@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useTripStore from "../store/tripStore";
 import TripCard from "./TripCard";
+import OnBoardModal from "./onBoardModal";
+import { AnimatePresence } from "motion/react"
 
 const Home = ({ user }) => {
   const [activeLink, setActiveLink] = useState("/");
@@ -29,6 +31,16 @@ const Home = ({ user }) => {
 
   useEffect(() => {
     setActiveLink("/");
+  }, []);
+
+  const trait = useAuthStore((state) => state.trait);
+  const bod = useAuthStore((state) => state.bod);
+  const firstTimeUser = !Boolean(trait && bod);
+  const [showOnBoardModal, setShowOnBoardModal] = useState(firstTimeUser);
+
+  useEffect(() => {
+    console.log("is firsttime user ", firstTimeUser);
+    console.log("is trait and bod are ", trait, bod);
   }, []);
 
   function getDaysFromTodayToStartDate(startDate) {
@@ -203,6 +215,10 @@ const Home = ({ user }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <AnimatePresence>
+        {showOnBoardModal && <OnBoardModal close={() => setShowOnBoardModal(false)} />}
+      </AnimatePresence>
     </div>
   );
 };
