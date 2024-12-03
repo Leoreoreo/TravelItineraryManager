@@ -30,7 +30,6 @@ const commutes = {
   flight: <FlightIcon />,
 };
 
-
 const Schedule = () => {
   const { trip_id } = useParams();
 
@@ -79,7 +78,7 @@ const Schedule = () => {
 
   // sort the events every time new events are added
   useEffect(() => {
-    console.log("trip events are ", tripEvents)
+    console.log("trip events are ", tripEvents);
   }, [tripEvents]);
 
   useEffect(() => {
@@ -107,7 +106,6 @@ const Schedule = () => {
     fetchEvents();
   }, [trip_id]);
 
-
   // Automatically update addresses when tripStops changes
   // useEffect(() => {
   //   const locations = tripStops.map((stop) => stop.location).filter(Boolean);
@@ -118,7 +116,6 @@ const Schedule = () => {
   //const handleAddClick = () => {
 
   const handleAddStopClick = () => {
-
     setEditingStop(null); // Reset editingStop when adding a new stop
     setShowStopModal(true);
   };
@@ -147,13 +144,12 @@ const Schedule = () => {
         setShowStopModal(false); // Close the modal after saving
       })
       .catch((error) => console.log(error));
-
   };
 
   // add the commute into database
   const handleAddTripCommute = () => {
     console.log("handle add trip commute, vehicle is ", vehicle);
-    console.log("events are ", tripEvents)
+    console.log("events are ", tripEvents);
     fetch(`${config.backendUrl}/addcommute`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -174,7 +170,6 @@ const Schedule = () => {
         setVehicle("walk");
       })
       .catch((error) => console.log(error));
-
   };
 
   const handleEditClick = (index) => {
@@ -192,15 +187,15 @@ const Schedule = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("event_id is ", data.event_id);
-// <<<<<<< HEAD
-//         const updatedStops = tripStops.map((stop) =>
-//           stop.event_id === tripStop.event_id ? tripStop : stop
-//         );
-//         setTripStops(updatedStops); // Update tripStops
-//         setShowModal(false); // Close the modal after saving
-// =======
+        // <<<<<<< HEAD
+        //         const updatedStops = tripStops.map((stop) =>
+        //           stop.event_id === tripStop.event_id ? tripStop : stop
+        //         );
+        //         setTripStops(updatedStops); // Update tripStops
+        //         setShowModal(false); // Close the modal after saving
+        // =======
         const trip = data.trip;
-        const newTrip = [];
+        let newTrip = [];
         for (const t of tripEvents) {
           if (t.event_id == trip.event_id) {
             newTrip.push(trip);
@@ -208,24 +203,48 @@ const Schedule = () => {
             newTrip.push(t);
           }
         }
+
+        // delete the commute method related to the edited stop event
+        for (let i = 0; i < newTrip.length; i++) {
+          if (newTrip[i].event_id === trip.event_id) {
+            let prev = null;
+            let next = null;
+            if (i > 0 && newTrip[i - 1].vehicle) {
+              prev = newTrip[i - 1];
+            }
+
+            if (i < newTrip.length - 1 && newTrip[i + 1].vehicle) {
+              next = newTrip[i + 1];
+            }
+
+            if (prev) {
+              handleDeleteClick(prev);
+            }
+            if (next) {
+              handleDeleteClick(next);
+            }
+            break;
+          }
+        }
+
+        newTrip = sortEvents(newTrip);
         setTripEvents(newTrip);
         setShowStopModal(false); // Close the modal after saving
-// >>>>>>> refine_add_trip_UI
       })
       .catch((error) => console.log(error));
   };
 
-  const handleDeleteClick = (index) => {
-    console.log("event is ", tripEvents[index]);
+  const handleDeleteClick = (delete_event) => {
+    //console.log("event is ", tripEvents[index]);
     fetch(`${config.backendUrl}/deleteevent`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event: tripEvents[index] }),
+      body: JSON.stringify({ event: delete_event }),
     })
       .then((response) => response.json())
       .then(() => {
         setTripEvents((events) =>
-          events.filter((event) => event.event_id !== tripEvents[index].event_id)
+          events.filter((event) => event.event_id !== delete_event.event_id)
         );
       })
       .catch((error) => console.log(error));
@@ -267,7 +286,9 @@ const Schedule = () => {
         </p>
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: "5px" }}>
           <button onClick={() => handleEditClick(index)}>Edit</button>
-          <button onClick={() => handleDeleteClick(index)}>Delete</button>
+          <button onClick={() => handleDeleteClick(tripEvents[index])}>
+            Delete
+          </button>
         </Box>
       </Box>
     );
@@ -296,9 +317,14 @@ const Schedule = () => {
             index === 0 || tripEvents[index - 1].vehicle ? ( // the first event is always stop, or if the last event is vehicle
               <StopCard stop={event} index={index} />
             ) : event.vehicle ? ( // if this is already a commute, then display the commute icon
-              <Box index={index} sx={{display:"flex", alignItems:"center", gap: 2}}>
+              <Box
+                index={index}
+                sx={{ display: "flex", alignItems: "center", gap: 2 }}
+              >
                 <Box>{commutes[event.vehicle]}</Box>
-                <button onClick={() => handleDeleteClick(index)}>x</button>
+                <button onClick={() => handleDeleteClick(tripEvents[index])}>
+                  x
+                </button>
               </Box>
             ) : (
               // otherwise, we need to have a button that allows user to add commute between two stops

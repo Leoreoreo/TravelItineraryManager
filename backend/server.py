@@ -98,7 +98,7 @@ def addTrip():
     endDate = data.get('endDate')
     uid = data.get('uid')
 
-    trip = add_trip_to_db(title, uid, startDate, endDate)
+    trip = add_trip_to_db(title, uid, tid=None, start_date=startDate, end_date=endDate)
     if trip:
         return jsonify({"trip": trip}), 200
     return jsonify({'error': 'fail to add trip into database'}), 401

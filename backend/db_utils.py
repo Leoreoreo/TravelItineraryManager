@@ -210,7 +210,7 @@ def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
     create_connection_pool()
     conn = None
     cursor = None
-    logging.info(f'{title}, {uid}')
+    logging.info(f'{title}, {uid}, {tid}, {start_date}, {end_date}')
 
     try:
         conn = connection_pool.getconn()  # get a connection from the pool
