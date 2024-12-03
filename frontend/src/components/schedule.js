@@ -109,11 +109,11 @@ const Schedule = () => {
 
 
   // Automatically update addresses when tripStops changes
-  useEffect(() => {
-    const locations = tripStops.map((stop) => stop.location).filter(Boolean);
-    setAddresses(locations);
-    console.log("Updated addresses:", locations);
-  }, [tripStops]);
+  // useEffect(() => {
+  //   const locations = tripStops.map((stop) => stop.location).filter(Boolean);
+  //   setAddresses(locations);
+  //   console.log("Updated addresses:", locations);
+  // }, [tripStops]);
 
   //const handleAddClick = () => {
 
