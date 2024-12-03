@@ -271,29 +271,30 @@ def recommend_trip(cid, t_emb):
 
 def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
 
-	""" add the trip to the database"""
-	create_connection_pool()
-	conn = None
-	cursor = None
-	logger.info(f'{title}, {uid}')
+    """ add the trip to the database"""
+    create_connection_pool()
+    conn = None
+    cursor = None
+    logging.info(f'{title}, {uid}, {tid}, {start_date}, {end_date}')
 
-	try:
-		conn = connection_pool.getconn()  # get a connection from the pool
-		cursor = conn.cursor()
+    try:
+        conn = connection_pool.getconn()  # get a connection from the pool
+        cursor = conn.cursor()
 
-		# insert the user into the users table
-		if not start_date or not end_date:
-			sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-			val = (uid, title)
-		elif tid:
-			sql = "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-			val = (tid, uid, title, start_date, end_date)
-		else:
-			sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
-			val = (uid, title, start_date, end_date)
-		cursor.execute(sql, val)
-		trip = cursor.fetchone()
-		conn.commit()
+        # insert the user into the users table
+        if not start_date or not end_date:
+            sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            val = (uid, title)
+        elif tid:
+            sql = "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            val = (tid, uid, title, start_date, end_date)
+        else:
+            sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            val = (uid, title, start_date, end_date)
+        cursor.execute(sql, val)
+        trip = cursor.fetchone()
+        conn.commit()
+
   
 		# Get column names from cursor description
 		columns = [desc[0] for desc in cursor.description]

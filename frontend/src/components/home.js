@@ -16,7 +16,7 @@ import useAuthStore from "../store/authStore";
 import useTripStore from "../store/tripStore";
 import TripCard from "./TripCard";
 import OnBoardModal from "./onBoardModal";
-import { AnimatePresence } from "motion/react"
+import { AnimatePresence } from "motion/react";
 
 const Home = ({ user }) => {
   const [activeLink, setActiveLink] = useState("/");
@@ -91,7 +91,7 @@ const Home = ({ user }) => {
 
     await addTrip(uid, title, startDate, endDate); // later need to add start date and end date
     if (error) {
-      setMessage(error);
+      setMessage("the error is ", error);
     } else {
       setTitle("");
       setStartDate("");
@@ -216,8 +216,13 @@ const Home = ({ user }) => {
         </DialogActions>
       </Dialog>
 
-      <AnimatePresence>
-        {showOnBoardModal && <OnBoardModal close={() => setShowOnBoardModal(false)} />}
+      <AnimatePresence mode="wait">
+        {showOnBoardModal && (
+          <OnBoardModal
+            key="onBoardModal"
+            close={() => setShowOnBoardModal(false)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
