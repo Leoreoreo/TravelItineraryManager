@@ -20,7 +20,8 @@ function SignIn() {
     });
     const data = await response.json();
     if (response.ok) {
-      setUser(data.uid, username);
+      const user_data = data.data;
+      setUser(user_data.uid, username, user_data.trait, user_data.bod);
       setMessage(data.message);
       navigate("/");
     } else {
