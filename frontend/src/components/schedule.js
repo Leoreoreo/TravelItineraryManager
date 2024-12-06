@@ -22,12 +22,20 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsSubwayIcon from "@mui/icons-material/DirectionsSubway";
 import FlightIcon from "@mui/icons-material/Flight";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import TrainIcon from '@mui/icons-material/Train';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import DirectionsRailwayIcon from '@mui/icons-material/DirectionsRailway';
+import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
+import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 
 const commutes = {
   walk: <DirectionsWalkIcon />,
   car: <DirectionsCarIcon />,
-  subway: <DirectionsSubwayIcon />,
-  flight: <FlightIcon />,
+  bus: <DirectionsBusIcon />,
+  train: <TrainIcon />,
+  railroad: <DirectionsRailwayIcon />,
+  plane: <AirplanemodeActiveIcon />,
+  ship: <DirectionsBoatIcon />
 };
 
 const Schedule = () => {
@@ -321,7 +329,9 @@ const Schedule = () => {
                 index={index}
                 sx={{ display: "flex", alignItems: "center", gap: 2 }}
               >
-                <Box>{commutes[event.vehicle]}</Box>
+
+                <Box>{commutes[event.vehicle.toLowerCase()]}</Box>
+
                 <button onClick={() => handleDeleteClick(tripEvents[index])}>
                   x
                 </button>
@@ -380,8 +390,11 @@ const Schedule = () => {
             >
               <MenuItem value={"walk"}>Walk</MenuItem>
               <MenuItem value={"car"}>Car</MenuItem>
-              <MenuItem value={"subway"}>Subway</MenuItem>
-              <MenuItem value={"flight"}>Flight</MenuItem>
+              <MenuItem value={"bus"}>Bus</MenuItem>
+              <MenuItem value={"train"}>Train</MenuItem>
+              <MenuItem value={"railroad"}>railroad</MenuItem>
+              <MenuItem value={"plane"}>Plane</MenuItem>
+              <MenuItem value={"ship"}>Ship</MenuItem>
             </Select>
           </FormControl>
           <button style={{ alignSelf: "end" }} onClick={handleAddTripCommute}>
