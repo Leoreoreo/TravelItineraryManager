@@ -329,7 +329,9 @@ const Schedule = () => {
                 index={index}
                 sx={{ display: "flex", alignItems: "center", gap: 2 }}
               >
+
                 <Box>{commutes[event.vehicle.toLowerCase()]}</Box>
+
                 <button onClick={() => handleDeleteClick(tripEvents[index])}>
                   x
                 </button>

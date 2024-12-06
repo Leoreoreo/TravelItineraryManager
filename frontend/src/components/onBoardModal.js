@@ -58,8 +58,10 @@ const OnBoardModal = ({ close }) => {
 
   return (
     <motion.div
+      key="onBoardModal"
       className="modal"
-      style={{ background: "black", color: "white" }}
+      style={{ background: "black", color: "white", opacity: 1 }}
+      initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{
         duration: 0.5,
@@ -166,7 +168,6 @@ const OnBoardModal = ({ close }) => {
                 "&:hover .MuiOutlinedInput-notchedOutline": {
                   borderColor: "gray", // Border color on hover
                 },
-
               },
               "& .MuiSelect-root": {
                 color: "white", // Ensures the selected text is white
