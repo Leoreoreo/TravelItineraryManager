@@ -268,7 +268,6 @@ def recommend_trip(cid, t_emb):
 		if conn:
 			connection_pool.putconn(conn)
 
-
 def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
 
 	""" add the trip to the database"""
@@ -475,7 +474,7 @@ def add_stop_to_db(trip_id, title, event_type, start_time, end_time, location, d
 		if conn:
 			connection_pool.putconn(conn)
 			
-def add_commute_to_db(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
+def add_commute_to_db_GPT(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
 	"""Add a stop to the trip in the database."""
 	create_connection_pool()
 	conn = None
