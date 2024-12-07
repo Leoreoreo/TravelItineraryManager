@@ -270,48 +270,60 @@ def recommend_trip(cid, t_emb):
 
 
 def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
+    """Add a trip to the database."""
 
-    """ add the trip to the database"""
     create_connection_pool()
     conn = None
     cursor = None
-    logging.info(f'{title}, {uid}, {tid}, {start_date}, {end_date}')
+    logger.info(f"Adding trip: {title}, {uid}, {tid}, {start_date}, {end_date}")
 
     try:
-        conn = connection_pool.getconn()  # get a connection from the pool
+        conn = connection_pool.getconn()
         cursor = conn.cursor()
 
-        # insert the user into the users table
         if not start_date or not end_date:
-            sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (uid_fk, trip_name) "
+                "VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (uid, title)
         elif tid:
-            sql = "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) "
+                "VALUES (%s, %s, %s, %s, %s) "
+                "RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (tid, uid, title, start_date, end_date)
         else:
-            sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) "
+                "VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (uid, title, start_date, end_date)
+
         cursor.execute(sql, val)
         trip = cursor.fetchone()
+
+        if not trip:
+            logger.warning("No trip was inserted.")
+            return None
+
+        columns = [desc[0] for desc in cursor.description]
+        trip = dict(zip(columns, trip))
+
+        logger.info(f"Trip added successfully: {trip}")
         conn.commit()
+        return trip
 
-  
-		# Get column names from cursor description
-		columns = [desc[0] for desc in cursor.description]
+    except Exception as e:
+        logger.exception("Error adding trip")
+        return None
 
-		# Fetch all rows and convert each to a dictionary
-		trip = dict(zip(columns, trip))
-
-		logger.info(f"User add trip, trip: {trip}")
-		return trip
-	except Exception as e:
-		logger.error(f"Error adding trip: {str(e)}")
-		return None
-	finally:
-		if cursor:
-			cursor.close()
-		if conn:
-			connection_pool.putconn(conn)
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
 		  
 def return_user_info(uid):
 	""" get user info of one user """

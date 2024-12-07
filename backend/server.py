@@ -107,12 +107,11 @@ def addTrip():
 	startDate = data.get('startDate')
 	endDate = data.get('endDate')
 	uid = data.get('uid')
-
-
-    trip = add_trip_to_db(title, uid, tid=None, start_date=startDate, end_date=endDate)
-    if trip:
-        return jsonify({"trip": trip}), 200
-    return jsonify({'error': 'fail to add trip into database'}), 401
+	
+	trip = add_trip_to_db(title, uid, tid=None, start_date=startDate, end_date=endDate)
+	if trip:
+		return jsonify({"trip": trip}), 200
+	return jsonify({'error': 'fail to add trip into database'}), 401
 
 
 @app.route('/addstop', methods=['POST'])
@@ -169,17 +168,17 @@ def editStop():
 		return jsonify({'message': 'Add Stop successful.', "trip": data}), 200
 	return jsonify({'message': 'Fail to stop successful.'}), 401
 
-@app.route('/fetchstops', methods=['GET'])
-def fetchStops():
-	trip_id = request.args.get('trip_id')
+# @app.route('/fetchstops', methods=['GET'])
+# def fetchStops():
+# 	trip_id = request.args.get('trip_id')
 
-	print("trip_id is ", trip_id)
-	stops = fetch_stops(trip_id)
-	print("stops are", stops)
-	if stops != None:
-		return jsonify({'message': 'Fetch successful.', "stops": stops}), 200
-	else:
-		return jsonify({'error': 'Fail to fetch all stops.'}), 401
+# 	print("trip_id is ", trip_id)
+# 	stops = fetch_stops(trip_id)
+# 	print("stops are", stops)
+# 	if stops != None:
+# 		return jsonify({'message': 'Fetch successful.', "stops": stops}), 200
+# 	else:
+# 		return jsonify({'error': 'Fail to fetch all stops.'}), 401
   
 @app.route('/deleteevent', methods=['DELETE'])
 def deleteEvent():
