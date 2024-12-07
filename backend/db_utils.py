@@ -268,7 +268,6 @@ def recommend_trip(cid, t_emb):
 		if conn:
 			connection_pool.putconn(conn)
 
-
 def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
 
     """ add the trip to the database"""
@@ -476,7 +475,7 @@ def add_stop_to_db(trip_id, title, event_type, start_time, end_time, location, d
 		if conn:
 			connection_pool.putconn(conn)
 			
-def add_commute_to_db(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
+def add_commute_to_db_GPT(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
 	"""Add a stop to the trip in the database."""
 	create_connection_pool()
 	conn = None
@@ -626,6 +625,58 @@ def delete_event_from_db(event_id):
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
+def fetch_stops(trip_id):
+    """ check all trips of a user from db """
+    create_connection_pool()
+    conn = None
+    cursor = None
+    
+    try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
+        
+        # fetch the user from the users table
+        sql =  '''SELECT events.event_id, events.start_time, events.end_time, events.title, events.link, stops.location, stops.description, stops.type
+        FROM events, stops
+        WHERE events.trip_id_fk = %s AND events.event_id = stops.event_id
+        ORDER BY events.start_time, events.end_time
+        '''
+        val = (trip_id,)
+        cursor.execute(sql, val)
+        stops = cursor.fetchall()
+
+        # Get column names from cursor description
+        columns = [desc[0] for desc in cursor.description]
+
+        # Fetch all rows and convert each to a dictionary
+        stops = [dict(zip(columns, row)) for row in stops]
+        for stop in stops:
+            start_time = stop['start_time']
+            stop['startDate'] = start_time.date().isoformat()
+            stop['startHour'] = start_time.hour
+            stop['startMinute'] = start_time.minute
+            del stop['start_time']
+
+            end_time = stop['end_time']
+            stop['endDate'] = end_time.date().isoformat()
+            stop['endHour'] = end_time.hour
+            stop['endMinute'] = end_time.minute
+            del stop['end_time']
+
+        logging.info(f"stops are {stops}")
+        # valid
+        logging.info(f"Fetch All stops")
+        return stops
+
+    except Exception as e:
+        logging.error(f"Error fetching stops: {str(e)}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
+
 
 def fetch_events(trip_id):
     """ check all trips of a user from db """

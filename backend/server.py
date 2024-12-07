@@ -6,6 +6,7 @@ import logging
 import atexit
 from db_utils import *
 from recommend import *
+from chatbot import *
 from helper import *
 from logger_config import get_logger
 from flask_cors import CORS
@@ -276,6 +277,22 @@ def recommend_trips():
 		return jsonify({'message': 'Recommend successful.', "tid_recs": tid_recs}), 200
 	else:
 		return jsonify({'error': 'Fail to recommend trips.'}), 401
+
+
+@app.route('/generate_gpt_trip', methods=['POST'])
+def gen_trip():
+	data = request.get_json()
+	uid = data.get('uid')
+	user_input = data.get('user_input')
+
+	tid = generate_trip(uid, user_input)
+
+	if tid != None:
+		return jsonify({'message': 'Trip generation successful.', "tid": tid}), 200
+	else:
+		return jsonify({'error': 'Fail to generate trip.'}), 401
+
+
 
 
 '''
