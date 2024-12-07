@@ -24,59 +24,58 @@ if not os.path.exists(model_path): os.makedirs(model_path)
 ################################################################################################################
 
 def users_to_df():
-  # users = get_all_users() 	# print(users) # 2d array: [[id, name, trait, age], ...]
-  users = return_users()
-  users_dict = defaultdict(list)
+	# users = get_all_users() 	# print(users) # 2d array: [[id, name, trait, age], ...]
+	users = return_users()
+	users_dict = defaultdict(list)
   
-  # creating dictionary to conver to df
-  for u in users:
-	  users_dict['uid'].append(u[0])
-	  users_dict['age'].append(u[3])
-	  users_dict['trait'].append(u[2])
-	  
-  df = pd.DataFrame(users_dict)
+	# creating dictionary to conver to df
+	for u in users:
+		users_dict['uid'].append(u[0])
+		users_dict['age'].append(u[3])
+		users_dict['trait'].append(u[2])
+	
+	df = pd.DataFrame(users_dict)
 
-  # REPLACING NULL VALUES WITH MEAN AGE AND MOST COMMON TRAIT
-  avg_age = df['age'].fillna(df['age'].mean())
-  df['age'] = avg_age
-  mode_trait = df['trait'].fillna(df['trait'].mode()[0])
-  df['trait'] = mode_trait
+	# REPLACING NULL VALUES WITH MEAN AGE AND MOST COMMON TRAIT
+	avg_age = df['age'].fillna(df['age'].mean())
+	df['age'] = avg_age
+	mode_trait = df['trait'].fillna(df['trait'].mode()[0])
+	df['trait'] = mode_trait
   
 
-  df_encoded = encode_df(df)
-  scaler, kmeans, df = cluster_df(df, df_encoded)
-  # plot_kmeans(df)
-  
-  return scaler, kmeans, df, df_encoded
+	df_encoded = encode_df(df)
+	scaler, kmeans, df = cluster_df(df, df_encoded)
+  	# plot_kmeans(df)
+	return scaler, kmeans, df, df_encoded
 
 def cluster_df(df, df_encoded):
-  scaler = StandardScaler()
-  scaled_data = scaler.fit_transform(df_encoded)
+	scaler = StandardScaler()
+	scaled_data = scaler.fit_transform(df_encoded)
 
-  # Fit the model with a chosen number of clusters (e.g., 3)
-  kmeans = KMeans(n_clusters=10, random_state=42)
-  kmeans.fit(scaled_data) # scaled_data = age + one hot encoded preferences
+	# Fit the model with a chosen number of clusters (e.g., 3)
+	kmeans = KMeans(n_clusters=10, random_state=42)
+	kmeans.fit(scaled_data) # scaled_data = age + one hot encoded preferences
 
-  # Add cluster labels to the dataframe
-  df['cluster_id'] = kmeans.labels_
-  return scaler, kmeans, df
+	# Add cluster labels to the dataframe
+	df['cluster_id'] = kmeans.labels_
+	return scaler, kmeans, df
 
 def encode_df(df):
-  encoded_preferences = pd.get_dummies(df['trait'])
+	encoded_preferences = pd.get_dummies(df['trait'])
 
-  # combine the one-hot encoded columns with the original dataframe
-  df_encoded = pd.concat([df.drop(columns=['trait', 'uid']), encoded_preferences], axis=1)
+	# combine the one-hot encoded columns with the original dataframe
+	df_encoded = pd.concat([df.drop(columns=['trait', 'uid']), encoded_preferences], axis=1)
 
-  return df_encoded
+	return df_encoded
 
 
 def plot_kmeans(df):
-  plt.scatter(df['age'], df['trait'], c=df['cluster_id'], cmap='viridis')
-  plt.xlabel('Age')
-  plt.ylabel('trait')
-  plt.title('K-Means Clustering of Users Based on Age and Preference')
-  plt.colorbar(label='Cluster')
-  plt.show()
+	plt.scatter(df['age'], df['trait'], c=df['cluster_id'], cmap='viridis')
+	plt.xlabel('Age')
+	plt.ylabel('trait')
+	plt.title('K-Means Clustering of Users Based on Age and Preference')
+	plt.colorbar(label='Cluster')
+	plt.show()
 
 
 ################################################################################################################
@@ -100,7 +99,7 @@ def preprocess_trip_data(trips):
 				# sequence.append('_'.join(stop['location'].split(' ')))
 				sequence.append(stop['location'])
 			except TypeError:
-			  pass
+			  	pass
 				# print(tid)
 				# print(stop)
 				

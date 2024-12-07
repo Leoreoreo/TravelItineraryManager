@@ -37,7 +37,7 @@ def call_openai(pref, age, user_input):
 	# completion_tokens = response['usage']['completion_tokens']
 	# total_tokens = response['usage']['total_tokens']
 	# print(prompt_tokens, completion_tokens, total_tokens)
-	
+
 	# Accessing the message content and parsing it as JSON
 	# content = response['choices']
 	# content = content[0]
@@ -89,7 +89,7 @@ def generate_trip(user_id, user_input):
 
 
 	return trip_info["trip_id"]
-	
+
 
 	# add trip to db
 	# create events
@@ -104,3 +104,8 @@ def generate_trip(user_id, user_input):
 
 "WALK"},{"type":"commute","start_time":"2023-11-03 09:15:00","end_time":"2023-11-03 09:30:00","location
 	'''
+=======
+
+"WALK"},{"type":"commute","start_time":"2023-11-03 09:15:00","end_time":"2023-11-03 09:30:00","location
+	'''
+
