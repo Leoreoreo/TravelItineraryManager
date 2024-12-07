@@ -96,15 +96,11 @@ def preprocess_trip_data(trips):
 		
 		for stop in stops:
 			try:
-				# sequence.append('_'.join(stop['location'].split(' ')))
 				sequence.append(stop['location'])
+
 			except TypeError:
-			  	pass
-				# print(tid)
-				# print(stop)
-				
-		# sequence = ['_'.join(stop['location'].split(' ')) for stop in stops]
-		
+				pass
+
 		trips_sequences.append(sequence)
 		
 	return trips_sequences
@@ -187,7 +183,7 @@ def embed_all_trips(model, df=None, use_df=False):
 		for user in user_cluster:
 			user_id = user[0]
 			cluster_id = user[3]
-			trips = get_trips_from_user(user_id)
+			trips = fetch_all_trips(user_id)
 			if not trips: continue
 			
 			for trip in trips:
@@ -231,7 +227,9 @@ def preprocess_user(age, trait, scaler, trait_mapping):
 def predict_cluster(kmeans, scaler, user_age=21, user_trait="Adventurer"):
 	trait_mapping = {"Adventurer": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], "Artist": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], "Budget": [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], "Family": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0], "Foodie": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], "Historian": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], "Luxury": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0], "Nature": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], "Sightseer": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], "Solo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]}
 	
-	user_data = preprocess_user(user_age, user_trait, scaler, trait_mapping)	# convert to format that kmeans can handle
+	user_data = preprocess_user(user_age, user_trait, scaler, trait_mapping)
+	print(f"USER DATAAAAA {user_data}")
+		# convert to format that kmeans can handle
 	predicted_cluster = kmeans.predict(user_data)	  
 	return int(predicted_cluster[0])
 	
@@ -240,8 +238,8 @@ def rec_recommend_trip(user_id, trip_id):
 	user_info = return_user_info(user_id)
 	print("USER INFO!!!!")
 	print(user_info)
-	user_age = user_info[3] if user_info else 21
-	user_trait = user_info[2] if user_info else "Adventurer"
+	user_age = user_info[3] if user_info[3] else 21
+	user_trait = user_info[2] if user_info[2] else "Adventurer"
 	
 	kmeans_path = os.path.join(model_path, "kmeans.pkl")
 	scaler_path = os.path.join(model_path, "scaler.pkl")

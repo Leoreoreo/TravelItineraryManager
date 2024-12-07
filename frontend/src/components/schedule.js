@@ -1,7 +1,6 @@
 // Schedule.js
 import React, { useState, useEffect } from "react";
 import MapComponent from "./googleMap";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import AddStop from "./addStop"; // Import the AddStop component
 import { useParams } from "react-router-dom";
 import config from "../config";
@@ -20,8 +19,7 @@ import {
 import useTripStore from "../store/tripStore";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import DirectionsSubwayIcon from "@mui/icons-material/DirectionsSubway";
-import FlightIcon from "@mui/icons-material/Flight";
+
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import TrainIcon from "@mui/icons-material/Train";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
@@ -41,41 +39,6 @@ const commutes = {
   ship: <DirectionsBoatIcon />,
 };
 
-// Create an array of commutes from the trip events for google maps
-const createCommutesArray = (tripEvents) => {
-  const commutes = [];
-
-  for (let i = 0; i < tripEvents.length - 1; i++) {
-    const currentEvent = tripEvents[i];
-    const nextEvent = tripEvents[i + 1];
-
-    // Determine the type of current and next event
-    const isCurrentTripStop = currentEvent.location && !currentEvent.location_start;
-    const isNextTripStop = nextEvent.location && !nextEvent.location_start;
-
-    if (isCurrentTripStop && isNextTripStop) {
-      // Two consecutive tripStops
-      commutes.push({
-        start_location: currentEvent.location,
-        end_location: nextEvent.location,
-        start_time: `${currentEvent.startDate} ${currentEvent.startHour}:${currentEvent.startMinute}`,
-        end_time: `${nextEvent.startDate} ${nextEvent.startHour}:${nextEvent.startMinute}`,
-        vehicle: null, // No vehicle for tripStop-to-tripStop commute
-      });
-    } else if (currentEvent.location_start && currentEvent.location_end) {
-      // Commute event
-      commutes.push({
-        start_location: currentEvent.location_start,
-        end_location: currentEvent.location_end,
-        start_time: `${currentEvent.startDate} ${currentEvent.startHour}:${currentEvent.startMinute}`,
-        end_time: `${currentEvent.endDate} ${currentEvent.endHour}:${currentEvent.endMinute}`,
-        vehicle: currentEvent.vehicle || null, // Use vehicle if available
-      });
-    }
-  }
-  return commutes;
-};
-
 const Schedule = () => {
   const { trip_id } = useParams();
 
@@ -91,12 +54,12 @@ const Schedule = () => {
   const [vehicle, setVehicle] = useState("walk");
   const [tripEvents, setTripEvents] = useState([]); // State to hold the trip stops
   const [editingStop, setEditingStop] = useState(null); // State to track the stop being edited
-  const [commuteArray, setCommuteArray] = useState([]); // addresses for google map
+  const [addresses, setAddresses] = useState([]);
 
   // recommend
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [recommendTrips, setRecommendTrips] = useState([]);
+  const [recommendTripIDs, setRecommendTripIDs] = useState([]);
 
   const sortEvents = (events) => {
     events.sort((a, b) => {
@@ -130,17 +93,11 @@ const Schedule = () => {
     return events;
   };
 
-  // // Automatically update commuteArray when tripStops changes
-  // useEffect(() => {
-  //   setCommuteArray(createCommutesArray(tripEvents));
-  //   console.log("commutes are ", commuteArray);
-  // }, [tripEvents]);
+  // sort the events every time new events are added
+  useEffect(() => {
+    console.log("trip events are ", tripEvents);
+  }, [tripEvents]);
 
-  // update commuteArray when refreshed
-  const handleRefresh = () => {
-    setCommuteArray(createCommutesArray(tripEvents));
-    console.log("commutes are ", commuteArray);
-  };
   useEffect(() => {
     setFadeIn(true);
   }, []);
@@ -166,6 +123,15 @@ const Schedule = () => {
     fetchEvents();
   }, [trip_id]);
 
+  // Automatically update addresses when tripStops changes
+  // useEffect(() => {
+  //   const locations = tripStops.map((stop) => stop.location).filter(Boolean);
+  //   setAddresses(locations);
+  //   console.log("Updated addresses:", locations);
+  // }, [tripStops]);
+
+  //const handleAddClick = () => {
+
   const handleAddStopClick = () => {
     setEditingStop(null); // Reset editingStop when adding a new stop
     setShowStopModal(true);
@@ -180,7 +146,7 @@ const Schedule = () => {
     const response = await fetch(`${config.backendUrl}/recommend_trips`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid, trip_id }),
+      body: JSON.stringify({ uid, tid: trip_id }),
     });
 
     if (!response.ok) {
@@ -190,7 +156,7 @@ const Schedule = () => {
     }
 
     const data = await response.json();
-    setRecommendTrips(data.tid_recs);
+    setRecommendTripIDs(data.tid_recs);
     console.log("[schedule] the recommend trip ids are ", data.tid_recs);
 
     setLoading(false);
@@ -263,6 +229,13 @@ const Schedule = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("event_id is ", data.event_id);
+        // <<<<<<< HEAD
+        //         const updatedStops = tripStops.map((stop) =>
+        //           stop.event_id === tripStop.event_id ? tripStop : stop
+        //         );
+        //         setTripStops(updatedStops); // Update tripStops
+        //         setShowModal(false); // Close the modal after saving
+        // =======
         const trip = data.trip;
         let newTrip = [];
         for (const t of tripEvents) {
@@ -363,14 +336,15 @@ const Schedule = () => {
     );
   };
 
+  // const addresses = [
+  //   "Knott Hall, Notre Dame, IN",
+  //   "Debartoo Hall, Notre Dame, IN",
+  //   "Potawatomi Zoo, South Bend, IN",
+  // ];
   return (
     <div>
       <Box className="googleMap">
-        <MapComponent commuteArray={commuteArray} />
-        <RefreshIcon
-            onClick={handleRefresh}
-            className="refreshIcon"
-        />
+        <MapComponent addresses={addresses} />
       </Box>
 
       <div className="schedule">
@@ -378,9 +352,14 @@ const Schedule = () => {
         <button onClick={handleAddStopClick} style={{ marginBottom: "20px" }}>
           Add Trip Stop
         </button>
-        <button onClick={handleRecommendClick} style={{ marginBottom: "20px" }}>
-          Recommend Similar Trips
-        </button>
+        {tripEvents.length > 0 && (
+          <button
+            onClick={handleRecommendClick}
+            style={{ marginBottom: "20px" }}
+          >
+            Recommend Similar Trips
+          </button>
+        )}
 
         {/* Render the list of trip stops */}
         <div className="trip-stops-list">
@@ -433,9 +412,10 @@ const Schedule = () => {
       {recommendModalOpen && (
         <div class="modal">
           <RecommendModal
-            onClose={() => setRecommendModalOpen(false)}
+            setRecommendModalOpen = {setRecommendModalOpen}
+            setRecommendTripIDs = {setRecommendTripIDs}
             loading={loading}
-            recommendTrips={recommendTrips}
+            recommendTripIDs={recommendTripIDs}
           />
         </div>
       )}

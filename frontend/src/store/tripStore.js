@@ -20,7 +20,7 @@ const useTripStore = create((set) => ({
         set({ error: data.message, loading: false });
         throw new Error("Failed to fetch trips");
       }
-      
+
       set({ trips: data.trips, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
@@ -39,7 +39,9 @@ const useTripStore = create((set) => ({
         throw new Error("Failed to add trip");
       }
       const data = await response.json();
+      console.log("[trip store] the newly added trip is ", data.trip);
       set((state) => ({ trips: [...state.trips, data.trip], loading: false })); // { trip_id, trip_name, start_date, end_date }
+      return data.trip
     } catch (error) {
       set({ error: error.message, loading: false });
     }
@@ -57,7 +59,10 @@ const useTripStore = create((set) => ({
         throw new Error("Failed to remove trip");
       }
       const data = await response.json();
-      set((state) => ({ trips: state.trips.filter(trip => trip.trip_id !== trip_id), loading: false }));
+      set((state) => ({
+        trips: state.trips.filter((trip) => trip.trip_id !== trip_id),
+        loading: false,
+      }));
     } catch (error) {
       set({ error: error.message, loading: false });
     }
