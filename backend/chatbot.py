@@ -103,8 +103,7 @@ def generate_trip(user_id, user_input):
 	"trip_name":"Urban Adventures in Chicago","start_date":"2023-11-03","end_date":"2023-11-04","events":[{"type":"stop","start_time":"2023-11-03 09:00:00","end_time":"2023-11-03 09:15:00","location":"HI Chicago Hostel","location_start":"","location_end":"","preferred_weather":"WARM","mode":
 
 "WALK"},{"type":"commute","start_time":"2023-11-03 09:15:00","end_time":"2023-11-03 09:30:00","location
-	'''
-=======
+	
 
 "WALK"},{"type":"commute","start_time":"2023-11-03 09:15:00","end_time":"2023-11-03 09:30:00","location
 	'''

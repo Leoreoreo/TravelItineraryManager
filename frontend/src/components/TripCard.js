@@ -77,8 +77,8 @@ const TripCard = ({
       >
         <Typography variant="h4">{title}</Typography>
         <Box>
-          <Typography variant="subtitle1">{formatDate(startDate)} -</Typography>
-          <Typography variant="subtitle1">{formatDate(endDate)}</Typography>
+          {startDate && <Typography variant="subtitle1">{formatDate(startDate)} -</Typography>}
+          {endDate && <Typography variant="subtitle1">{formatDate(endDate)}</Typography>}
         </Box>
       </Box>
     </Box>

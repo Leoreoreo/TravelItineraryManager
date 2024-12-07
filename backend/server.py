@@ -266,6 +266,7 @@ def recommend_trips():
 	uid = data.get('uid')
 	tid = data.get('tid')
 
+	print("uid tid is",uid, tid)
 	# print(cid)
 	# print(t_emb)
 
