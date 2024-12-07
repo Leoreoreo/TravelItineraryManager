@@ -29,7 +29,7 @@
     "zustand": "^5.0.1"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 PORT=3000 react-scripts start",
+    "start": "HOST=0.0.0.0 PORT=8082 react-scripts start",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "build": "react-scripts build",
