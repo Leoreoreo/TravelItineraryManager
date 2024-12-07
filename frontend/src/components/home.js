@@ -3,20 +3,30 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  IconButton,
+  Input,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
   TextField,
   Typography,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useTripStore from "../store/tripStore";
 import TripCard from "./TripCard";
 import OnBoardModal from "./onBoardModal";
-import { AnimatePresence } from "motion/react";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import { AnimatePresence, motion } from "framer-motion";
+import config from "../config";
 
 const Home = ({ user }) => {
   const [activeLink, setActiveLink] = useState("/");
@@ -26,21 +36,69 @@ const Home = ({ user }) => {
   const [endDate, setEndDate] = useState("");
   const [message, setMessage] = useState("");
   const uid = useAuthStore((state) => state.uid);
-  const { trips, loading, error, fetchTrips, addTrip, removeTrip } =
-    useTripStore();
+  const { trips, error, fetchTrips, addTrip, removeTrip } = useTripStore();
 
-  useEffect(() => {
-    setActiveLink("/");
-  }, []);
-
+  // for first time user on board
   const trait = useAuthStore((state) => state.trait);
   const bod = useAuthStore((state) => state.bod);
   const firstTimeUser = !Boolean(trait && bod);
   const [showOnBoardModal, setShowOnBoardModal] = useState(firstTimeUser);
 
+  // for the gpt helper
+  const boxRef = useRef(null);
+  const [showInput, setShowInput] = useState(false);
+  const [userInput, setUserInput] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const handleButtonClick = () => {
+    setShowInput(true);
+  };
+  // if click outside the box, the input field will disappear
+  const handleClickOutside = (event) => {
+    // Check if the click is outside the referenced box
+    if (boxRef.current && !boxRef.current.contains(event.target)) {
+      setShowInput(false);
+    }
+  };
   useEffect(() => {
-    console.log("is firsttime user ", firstTimeUser);
-    console.log("is trait and bod are ", trait, bod);
+    // Add event listener for clicks on the document
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Cleanup the event listener on component unmount
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleGenerate = async () => {
+    if (userInput.length === 0) return;
+
+    try {
+      setGenerating(true);
+      const response = await fetch(`${config.backendUrl}/generate_gpt_trip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid, user_input: userInput }),
+      });
+
+      if (!response.ok) {
+        console.log("cannot generate");
+      }
+
+      const data = await response.json();
+      console.log(
+        "[home] successfully generate the trip, the response is ",
+        data
+      );
+    } catch (error) {
+      console.log("[home] generate trip: ", error);
+    } finally {
+      setGenerating(false);
+      setUserInput("");
+      fetchTrips(uid);
+    }
+  };
+
+  useEffect(() => {
+    setActiveLink("/");
   }, []);
 
   function getDaysFromTodayToStartDate(startDate) {
@@ -149,6 +207,88 @@ const Home = ({ user }) => {
               />
             </Link>
           ))}
+      </Box>
+      <Box
+        ref={boxRef}
+        sx={{
+          position: "fixed",
+          bottom: 20,
+          left: 0,
+          width: "100vw",
+          height: "60px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            position: "relative", // Ensure smooth positioning
+          }}
+        >
+          <motion.div
+            onClick={handleButtonClick}
+            layout
+            style={{
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              borderRadius: "50%",
+              padding: "10px",
+              backgroundColor: "#fff",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <AutoAwesomeIcon />
+          </motion.div>
+
+          {showInput && (
+            <motion.div
+              key="input"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              layout
+            >
+              <FormControl sx={{ m: 1, width: "400px" }} variant="standard">
+                <Input
+                  id="standard-adornment-password"
+                  placeholder="What can I help you create?"
+                  value={userInput}
+                  onChange={(event) => setUserInput(event.target.value)}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      {!generating ? (
+                        <div className="submit" onClick={handleGenerate}>
+                          <ArrowUpwardIcon />
+                        </div>
+                      ) : (
+                        <div
+                          style={{ marginBottom: "10px", padding: "5px" }}
+                          onClick={handleGenerate}
+                        >
+                          <CircularProgress size="30px" />
+                        </div>
+                      )}
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+              {/* <TextField
+                variant="standard"
+                placeholder="What can I help you create?"
+                autoFocus
+                sx={{ width: "400px" }}
+                value={userInput}
+                onChange={(event) => setUserInput(event.target.value)}
+              /> */}
+            </motion.div>
+          )}
+        </Box>
       </Box>
       {/* <button
                 className="delete-trip-button"

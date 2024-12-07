@@ -69,7 +69,7 @@ const OnBoardModal = ({ close }) => {
         ease: "easeInOut",
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", color: "white" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", color: "white", position: "relative", height: "70%" }}>
         <motion.div
           style={{
             display: "flex",
@@ -224,8 +224,9 @@ const OnBoardModal = ({ close }) => {
         </motion.div>
         {newBod && newTrait && (
           <button
-            style={{ background: "white", color: "black", alignSelf: "end" }}
+            style={{ background: "white", color: "black", alignSelf: "end", position:"absolute", bottom: 70 }}
             onClick={handleConfirm}
+            
           >
             confirm
           </button>
