@@ -23,11 +23,13 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsSubwayIcon from "@mui/icons-material/DirectionsSubway";
 import FlightIcon from "@mui/icons-material/Flight";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import TrainIcon from '@mui/icons-material/Train';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import DirectionsRailwayIcon from '@mui/icons-material/DirectionsRailway';
-import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
-import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
+import TrainIcon from "@mui/icons-material/Train";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import DirectionsRailwayIcon from "@mui/icons-material/DirectionsRailway";
+import AirplanemodeActiveIcon from "@mui/icons-material/AirplanemodeActive";
+import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
+import useAuthStore from "../store/authStore";
+import RecommendModal from "./RecommendModal";
 
 const commutes = {
   walk: <DirectionsWalkIcon />,
@@ -36,7 +38,7 @@ const commutes = {
   train: <TrainIcon />,
   railroad: <DirectionsRailwayIcon />,
   plane: <AirplanemodeActiveIcon />,
-  ship: <DirectionsBoatIcon />
+  ship: <DirectionsBoatIcon />,
 };
 
 // Create an array of commutes from the trip events for google maps
@@ -77,6 +79,9 @@ const createCommutesArray = (tripEvents) => {
 const Schedule = () => {
   const { trip_id } = useParams();
 
+  // user id
+  const uid = useAuthStore((state) => state.uid);
+
   const trips = useTripStore((state) => state.trips); // used to get the info of this specific trip
   const trip = trips.find((trip) => trip.trip_id.toString() === trip_id); // get the info of this specific trip
   const [fadeIn, setFadeIn] = useState(false);
@@ -87,6 +92,11 @@ const Schedule = () => {
   const [tripEvents, setTripEvents] = useState([]); // State to hold the trip stops
   const [editingStop, setEditingStop] = useState(null); // State to track the stop being edited
   const [commuteArray, setCommuteArray] = useState([]); // addresses for google map
+
+  // recommend
+  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [recommendTrips, setRecommendTrips] = useState([]);
 
   const sortEvents = (events) => {
     events.sort((a, b) => {
@@ -159,6 +169,31 @@ const Schedule = () => {
   const handleAddStopClick = () => {
     setEditingStop(null); // Reset editingStop when adding a new stop
     setShowStopModal(true);
+  };
+
+  const handleRecommendClick = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    setRecommendModalOpen(true);
+
+    const response = await fetch(`${config.backendUrl}/recommend_trips`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, trip_id }),
+    });
+
+    if (!response.ok) {
+      console.log("the recommend api fails");
+      setLoading(false);
+      setRecommendModalOpen(false);
+    }
+
+    const data = await response.json();
+    setRecommendTrips(data.tid_recs);
+    console.log("[schedule] the recommend trip ids are ", data.tid_recs);
+
+    setLoading(false);
   };
 
   const handleAddCommuteClick = (event, index) => {
@@ -343,18 +378,20 @@ const Schedule = () => {
         <button onClick={handleAddStopClick} style={{ marginBottom: "20px" }}>
           Add Trip Stop
         </button>
+        <button onClick={handleRecommendClick} style={{ marginBottom: "20px" }}>
+          Recommend Similar Trips
+        </button>
 
         {/* Render the list of trip stops */}
         <div className="trip-stops-list">
           {tripEvents.map((event, index) =>
             index === 0 || tripEvents[index - 1].vehicle ? ( // the first event is always stop, or if the last event is vehicle
-              <StopCard stop={event} index={index} />
+              <StopCard key={index} stop={event} index={index} />
             ) : event.vehicle ? ( // if this is already a commute, then display the commute icon
               <Box
                 index={index}
                 sx={{ display: "flex", alignItems: "center", gap: 2 }}
               >
-
                 <Box>{commutes[event.vehicle.toLowerCase()]}</Box>
 
                 <button onClick={() => handleDeleteClick(tripEvents[index])}>
@@ -390,6 +427,15 @@ const Schedule = () => {
             onEdit={handleEditTripStop}
             onCancel={() => setShowStopModal(false)}
             initialData={editingStop !== null ? tripEvents[editingStop] : null} // Pass the stop to edit or null
+          />
+        </div>
+      )}
+      {recommendModalOpen && (
+        <div class="modal">
+          <RecommendModal
+            onClose={() => setRecommendModalOpen(false)}
+            loading={loading}
+            recommendTrips={recommendTrips}
           />
         </div>
       )}
