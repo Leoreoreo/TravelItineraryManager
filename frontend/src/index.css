@@ -133,6 +133,27 @@ button:hover {
   background-color: var(--bggrey);
 }
 
+/* Refresh Icon */
+.refreshIcon {
+  position: absolute;
+  top: 45px;
+  left: 220px;
+  transform: translate(-50%, -50%);
+  display: none; /* Hidden by default */
+  cursor: pointer;
+  border: 10px solid; /* Make the border thicker */
+  border-radius: 25px; /* Make the border radius larger */
+  border-color: white;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.refreshIcon:hover {
+  background-color: grey;
+  border-color: grey;
+}
+
 .schedule {
   position: fixed;
   top: 75px;
