@@ -41,7 +41,7 @@ const useTripStore = create((set) => ({
       const data = await response.json();
       console.log("[trip store] the newly added trip is ", data.trip);
       set((state) => ({ trips: [...state.trips, data.trip], loading: false })); // { trip_id, trip_name, start_date, end_date }
-      return data.trip
+      return data.trip;
     } catch (error) {
       set({ error: error.message, loading: false });
     }
