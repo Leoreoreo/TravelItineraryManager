@@ -268,49 +268,62 @@ def recommend_trip(cid, t_emb):
 		if conn:
 			connection_pool.putconn(conn)
 
-def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
 
-    """ add the trip to the database"""
+def add_trip_to_db(title, uid, tid=None, start_date=None, end_date=None):
+    """Add a trip to the database."""
+
     create_connection_pool()
     conn = None
     cursor = None
-    logging.info(f'{title}, {uid}, {tid}, {start_date}, {end_date}')
+    logger.info(f"Adding trip: {title}, {uid}, {tid}, {start_date}, {end_date}")
 
     try:
-        conn = connection_pool.getconn()  # get a connection from the pool
+        conn = connection_pool.getconn()
         cursor = conn.cursor()
 
-        # insert the user into the users table
         if not start_date or not end_date:
-            sql = "INSERT INTO trips (uid_fk, trip_name) VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (uid_fk, trip_name) "
+                "VALUES (%s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (uid, title)
         elif tid:
-            sql = "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (trip_id, uid_fk, trip_name, start_date, end_date) "
+                "VALUES (%s, %s, %s, %s, %s) "
+                "RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (tid, uid, title, start_date, end_date)
         else:
-            sql = "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            sql = (
+                "INSERT INTO trips (uid_fk, trip_name, start_date, end_date) "
+                "VALUES (%s, %s, %s, %s) RETURNING trip_id, trip_name, start_date, end_date"
+            )
             val = (uid, title, start_date, end_date)
+
         cursor.execute(sql, val)
         trip = cursor.fetchone()
+
+        if not trip:
+            logger.warning("No trip was inserted.")
+            return None
+
+        columns = [desc[0] for desc in cursor.description]
+        trip = dict(zip(columns, trip))
+
+        logger.info(f"Trip added successfully: {trip}")
         conn.commit()
+        return trip
 
-  
-		# Get column names from cursor description
-		columns = [desc[0] for desc in cursor.description]
+    except Exception as e:
+        logger.exception("Error adding trip")
+        return None
 
-		# Fetch all rows and convert each to a dictionary
-		trip = dict(zip(columns, trip))
-
-		logger.info(f"User add trip, trip: {trip}")
-		return trip
-	except Exception as e:
-		logger.error(f"Error adding trip: {str(e)}")
-		return None
-	finally:
-		if cursor:
-			cursor.close()
-		if conn:
-			connection_pool.putconn(conn)
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            connection_pool.putconn(conn)
 		  
 def return_user_info(uid):
 	""" get user info of one user """
@@ -475,7 +488,7 @@ def add_stop_to_db(trip_id, title, event_type, start_time, end_time, location, d
 		if conn:
 			connection_pool.putconn(conn)
 			
-def add_commute_to_db_GPT(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
+def add_commute_to_db(trip_id, title, event_type, start_time, end_time, location_start, location_end=None, vehicle=None):
 	"""Add a stop to the trip in the database."""
 	create_connection_pool()
 	conn = None
@@ -625,58 +638,6 @@ def delete_event_from_db(event_id):
             cursor.close()
         if conn:
             connection_pool.putconn(conn)
-def fetch_stops(trip_id):
-    """ check all trips of a user from db """
-    create_connection_pool()
-    conn = None
-    cursor = None
-    
-    try:
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
-        
-        # fetch the user from the users table
-        sql =  '''SELECT events.event_id, events.start_time, events.end_time, events.title, events.link, stops.location, stops.description, stops.type
-        FROM events, stops
-        WHERE events.trip_id_fk = %s AND events.event_id = stops.event_id
-        ORDER BY events.start_time, events.end_time
-        '''
-        val = (trip_id,)
-        cursor.execute(sql, val)
-        stops = cursor.fetchall()
-
-        # Get column names from cursor description
-        columns = [desc[0] for desc in cursor.description]
-
-        # Fetch all rows and convert each to a dictionary
-        stops = [dict(zip(columns, row)) for row in stops]
-        for stop in stops:
-            start_time = stop['start_time']
-            stop['startDate'] = start_time.date().isoformat()
-            stop['startHour'] = start_time.hour
-            stop['startMinute'] = start_time.minute
-            del stop['start_time']
-
-            end_time = stop['end_time']
-            stop['endDate'] = end_time.date().isoformat()
-            stop['endHour'] = end_time.hour
-            stop['endMinute'] = end_time.minute
-            del stop['end_time']
-
-        logging.info(f"stops are {stops}")
-        # valid
-        logging.info(f"Fetch All stops")
-        return stops
-
-    except Exception as e:
-        logging.error(f"Error fetching stops: {str(e)}")
-        return None
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            connection_pool.putconn(conn)
-
 
 def fetch_events(trip_id):
     """ check all trips of a user from db """
