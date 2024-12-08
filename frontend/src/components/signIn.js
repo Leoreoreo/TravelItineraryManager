@@ -19,6 +19,7 @@ function SignIn() {
       body: JSON.stringify({ username, password }),
     });
     const data = await response.json();
+    console.log("[sign in] the data is ", data)
     if (response.ok) {
       const user_data = data.data;
       setUser(user_data.uid, username, user_data.trait, user_data.bod);

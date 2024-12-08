@@ -31,8 +31,12 @@ const User = ({ user }) => {
   const setTrait = useAuthStore((state) => state.setTrait);
   const setBOD = useAuthStore((state) => state.setBOD);
 
-  const [newBod, setNewBod] = useState(bod);
+  const [newBod, setNewBod] = useState(new Date(bod).toISOString().split("T")[0]);
   const [newTrait, setNewTrait] = useState(trait);
+
+  useEffect(()=>{
+    console.log("[user] the value of new bod is ", newBod)
+  },[newBod])
 
   useEffect(() => {
     if (newBod) {
