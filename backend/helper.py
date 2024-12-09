@@ -95,6 +95,7 @@ Please ensure that for every event, the start_time and end_time must strictly fo
 You must NOT include '\n', '\t', excess spaces or any newline or tab characters to your response. I repeat, do not include excess spaces or any newline or tab characters in your response.
 Please ensure that you stick strictly to english. 
 Please ensure each event detail (e.g. location) should have no more than 50 characters.
+Please please please make sure you add the exact location (include city, state) so that the location can be searched and retrieved from google maps api.
 If you don't, I will take $100 from you if any of these are breached.
 
 
