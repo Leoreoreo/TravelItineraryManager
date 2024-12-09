@@ -111,19 +111,19 @@ const Schedule = () => {
       }
 
       if (a.startMinute !== b.startMinute) {
-        return a.startHour - b.startHour;
+        return a.startMinute - b.startMinute;
       }
 
       if (a.endDate !== b.endDate) {
         return new Date(a.endDate) - new Date(b.endDate);
       }
 
-      if (a.endMinute !== b.endMinute) {
+      if (a.endHour !== b.endHour) {
         return a.endHour - b.endHour;
       }
 
       if (a.endMinute !== b.endMinute) {
-        return a.endHour - b.endHour;
+        return a.endMinute - b.endMinute;
       }
     });
 
