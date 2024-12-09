@@ -1,6 +1,7 @@
 // Schedule.js
 import React, { useState, useEffect } from "react";
 import MapComponent from "./googleMap";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import AddStop from "./addStop"; // Import the AddStop component
 import { useParams } from "react-router-dom";
 import config from "../config";
@@ -39,6 +40,42 @@ const commutes = {
   ship: <DirectionsBoatIcon />,
 };
 
+
+// Create an array of commutes from the trip events for google maps
+const createCommutesArray = (tripEvents) => {
+  const commutes = [];
+
+  for (let i = 0; i < tripEvents.length - 1; i++) {
+    const currentEvent = tripEvents[i];
+    const nextEvent = tripEvents[i + 1];
+
+    // Determine the type of current and next event
+    const isCurrentTripStop = currentEvent.location && !currentEvent.location_start;
+    const isNextTripStop = nextEvent.location && !nextEvent.location_start;
+
+    if (isCurrentTripStop && isNextTripStop) {
+      // Two consecutive tripStops
+      commutes.push({
+        start_location: currentEvent.location,
+        end_location: nextEvent.location,
+        start_time: `${currentEvent.startDate} ${currentEvent.startHour}:${currentEvent.startMinute}`,
+        end_time: `${nextEvent.startDate} ${nextEvent.startHour}:${nextEvent.startMinute}`,
+        vehicle: null, // No vehicle for tripStop-to-tripStop commute
+      });
+    } else if (currentEvent.location_start && currentEvent.location_end) {
+      // Commute event
+      commutes.push({
+        start_location: currentEvent.location_start,
+        end_location: currentEvent.location_end,
+        start_time: `${currentEvent.startDate} ${currentEvent.startHour}:${currentEvent.startMinute}`,
+        end_time: `${currentEvent.endDate} ${currentEvent.endHour}:${currentEvent.endMinute}`,
+        vehicle: currentEvent.vehicle || null, // Use vehicle if available
+      });
+    }
+  }
+  return commutes;
+};
+
 const Schedule = () => {
   const { trip_id } = useParams();
 
@@ -54,7 +91,7 @@ const Schedule = () => {
   const [vehicle, setVehicle] = useState("walk");
   const [tripEvents, setTripEvents] = useState([]); // State to hold the trip stops
   const [editingStop, setEditingStop] = useState(null); // State to track the stop being edited
-  const [addresses, setAddresses] = useState([]);
+  const [commuteArray, setCommuteArray] = useState([]); // addresses for google map
 
   // recommend
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
@@ -97,7 +134,11 @@ const Schedule = () => {
   useEffect(() => {
     console.log("trip events are ", tripEvents);
   }, [tripEvents]);
-
+  // update commuteArray when refreshed
+  const handleRefresh = () => {
+    setCommuteArray(createCommutesArray(tripEvents));
+    console.log("commutes are ", commuteArray);
+  };
   useEffect(() => {
     setFadeIn(true);
   }, []);
@@ -122,15 +163,6 @@ const Schedule = () => {
 
     fetchEvents();
   }, [trip_id]);
-
-  // Automatically update addresses when tripStops changes
-  // useEffect(() => {
-  //   const locations = tripStops.map((stop) => stop.location).filter(Boolean);
-  //   setAddresses(locations);
-  //   console.log("Updated addresses:", locations);
-  // }, [tripStops]);
-
-  //const handleAddClick = () => {
 
   const handleAddStopClick = () => {
     setEditingStop(null); // Reset editingStop when adding a new stop
@@ -229,13 +261,6 @@ const Schedule = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("event_id is ", data.event_id);
-        // <<<<<<< HEAD
-        //         const updatedStops = tripStops.map((stop) =>
-        //           stop.event_id === tripStop.event_id ? tripStop : stop
-        //         );
-        //         setTripStops(updatedStops); // Update tripStops
-        //         setShowModal(false); // Close the modal after saving
-        // =======
         const trip = data.trip;
         let newTrip = [];
         for (const t of tripEvents) {
@@ -336,15 +361,14 @@ const Schedule = () => {
     );
   };
 
-  // const addresses = [
-  //   "Knott Hall, Notre Dame, IN",
-  //   "Debartoo Hall, Notre Dame, IN",
-  //   "Potawatomi Zoo, South Bend, IN",
-  // ];
   return (
     <div>
       <Box className="googleMap">
-        <MapComponent addresses={addresses} />
+        <MapComponent commuteArray={commuteArray} />
+        <RefreshIcon
+            onClick={handleRefresh}
+            className="refreshIcon"
+        />
       </Box>
 
       <div className="schedule">
