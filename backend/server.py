@@ -5,31 +5,41 @@ from psycopg2 import pool
 import logging
 import atexit
 from db_utils import *
-from recommend import *
+from recommend import rec_recommend_trip, init_models
 from chatbot import *
 from helper import *
 from logger_config import get_logger
 from flask_cors import CORS
 from datetime import datetime
-
+from celery_make import make_celery 
+from celery.schedules import crontab
+ 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
+
+# set up celery
+celery = make_celery(app)
+# configure periodic tasks via beat
+celery.conf.CELERYBEAT_SCHEDULE = {
+'init-models-weekly': {
+    'task': 'server.init_models_server',  # name of function (task) that runs weekly
+         'schedule': crontab(minute=0, hour=0, day_of_week=0),  # every sunday at midnight
+     },
+}
+
 
 # logger.basicConfig(level=logger.INFO)
 logger = get_logger(__name__)
 
 atexit.register(free_connection_pool)# register the free_connection_pool function to be called on app shutdown
+@celery.task
+def init_models_server():
+	init_models()
 
 @app.route('/')
 def hello():
-	return 'Hello, World!'
-'''
-@app.route('/a')
-def smth():
-	init_models()
-	return 'initialized models'
-'''
+	return "hello this backend is working"
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -355,6 +365,22 @@ def add_bot_trips():
 	#	 print('User registration failed.')
 	#	 return jsonify({'error': 'User registration failed.'}), 500
 '''
+
+
+'''
+@app.route('/')
+def hello():
+	return 'Hello, World!'
+'''
+
+'''
+@celery.task
+@app.route('/a')
+def smth():
+	init_models()
+	return 'initialized models'
+'''
+
 
 @app.route('/db_version', methods=['GET'])
 def version():
