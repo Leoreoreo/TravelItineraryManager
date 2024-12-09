@@ -4,7 +4,6 @@ import os
 import logging
 from flask import current_app, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import current_app
 from logger_config import get_logger
 from datetime import datetime
 

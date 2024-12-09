@@ -12,6 +12,8 @@ import os
 from datetime import datetime
 # from flask import current_app
 # from server import app
+# from server import celery  
+
 
 base_dir = os.getcwd()
 model_path = os.path.join(base_dir, "model")
@@ -41,8 +43,6 @@ def users_to_df():
 	df['age'] = avg_age
 	mode_trait = df['trait'].fillna(df['trait'].mode()[0])
 	df['trait'] = mode_trait
-  
-
 	df_encoded = encode_df(df)
 	scaler, kmeans, df = cluster_df(df, df_encoded)
   	# plot_kmeans(df)
@@ -289,6 +289,9 @@ def init_models():
 	train_w2v()
 	train_kmeans_scaler()
 
+# @celery.task
+def test_task():
+	print("TESTING CELERY YES")
 
 # init_models()
 
